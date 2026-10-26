@@ -1,96 +1,810 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toque Natural - Nail Art Pro</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f8f9fa;
-            margin: 0;
-            padding: 16px;
-            color: #333;
-        }
-        .header-container {
-            background: white;
-            padding: 20px;
-            border-radius: 16px;
-            text-align: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
-        }
-        .logo-img {
-            max-width: 140px;
-            height: auto;
-            border-radius: 50%;
-            margin-bottom: 10px;
-        }
-        .brand-subtitle {
-            font-size: 12px;
-            letter-spacing: 1.5px;
-            color: #7b2cbf;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        .search-box {
-            background: white;
-            padding: 16px;
-            border-radius: 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
-        }
-        .search-input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            background-color: #f7fafc;
-            box-sizing: border-box;
-            font-size: 14px;
-        }
-        .categories-title {
-            font-size: 15px;
-            font-weight: bold;
-            color: #4a5568;
-            margin-bottom: 12px;
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 80px;
-        }
-        .card {
-            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
-            padding: 20px;
-            border-radius: 14px;
-            color: #2d3748;
-            font-weight: bold;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Toque Natural · Nail Art PRO</title>
+
+<!-- SDK de Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+
+<style>
+:root {
+  --bg-gradient: linear-gradient(135deg, #fdfbfd 0%, #f4eef8 100%);
+  --card-bg: #ffffff;
+  --text-main: #2b232a;
+  --text-muted: #6e626d;
+  --border-color: #eadcf2;
+  --primary: #9b51e0;
+  --primary-dark: #7b38bc;
+  --accent-pink: #ff6584;
+  --accent-cyan: #00cec9;
+  --shadow: 0 8px 25px rgba(155, 81, 224, 0.12);
+  --radius: 18px;
+}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg-gradient);color:var(--text-main);font-family:'Segoe UI', Roboto, Helvetica, Arial, sans-serif;padding:12px;padding-bottom:100px;}
+
+header{background:var(--card-bg);padding:20px 16px;border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:14px;border:1px solid var(--border-color);text-align:center;position:relative;}
+.top-admin-btn{position:absolute;top:12px;right:12px;}
+.top-admin-btn button{background:#f3eafa;color:var(--primary-dark);border:1px solid var(--border-color);padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;}
+
+.brand-logo-wrapper{width:130px;height:130px;border-radius:0;overflow:hidden;border:none;background:transparent;position:relative;display:inline-flex;align-items:center;justify-content:center;box-shadow:none;margin:0 auto 2px;}
+.brand-logo{width:100%;height:100%;object-fit:contain;object-position:center;}
+.brand-subtext{font-size:12px;color:var(--primary-dark);font-weight:800;letter-spacing:0.5px;margin-top:2px;}
+
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,0.96);backdrop-filter:blur(12px);border-top:1px solid var(--border-color);display:flex;justify-content:space-around;padding:10px 4px;z-index:40;box-shadow:0 -6px 25px rgba(0,0,0,0.08);}
+.bottom-nav button{background:transparent;border:none;display:flex;flex-direction:column;align-items:center;font-size:10px;font-weight:700;color:var(--text-muted);cursor:pointer;padding:4px 6px;border-radius:12px;transition:all 0.2s;}
+.bottom-nav button span{font-size:20px;margin-bottom:3px;}
+.bottom-nav button.active{color:var(--primary);background:#f3eafa;}
+
+.box{background:var(--card-bg);border-radius:var(--radius);padding:18px;margin-bottom:14px;box-shadow:var(--shadow);border:1px solid var(--border-color)}
+input,select,textarea,button{width:100%;padding:12px 14px;margin-top:8px;border-radius:12px;border:1px solid var(--border-color);font-size:13px;box-sizing:border-box;background:#faf5fc;color:var(--text-main);outline:none;transition: all 0.2s;}
+input:focus, textarea:focus{border-color:var(--primary);background:#fff;box-shadow:0 0 0 3px rgba(155,81,224,0.15)}
+button.action-btn{background:var(--primary);color:#fff;font-weight:700;border:none;cursor:pointer;box-shadow:0 4px 15px rgba(155,81,224,0.3);transition: filter 0.2s;}
+button.action-btn:hover{filter: brightness(1.1);}
+
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px}
+
+.card{background:var(--card-bg);border-radius:16px;overflow:hidden;border:1px solid var(--border-color);text-align:center;padding-bottom:10px;position:relative;box-shadow:0 4px 12px rgba(0,0,0,0.04);}
+.card-img-container{position:relative;width:100%;height:140px;cursor:pointer;background:#f5eeff;}
+.card img, .card video{width:100%;height:100%;object-fit:cover;display:block;}
+.card p{font-size:11px;margin:8px;color:var(--text-muted);font-weight:600}
+
+.folder-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:10px;}
+.folder-card{background:var(--card-bg);border:1px solid var(--border-color);border-radius:var(--radius);overflow:hidden;cursor:pointer;box-shadow:var(--shadow);transition:transform 0.2s;}
+.folder-card:hover{transform:translateY(-3px);}
+.folder-cover{width:100%;height:100px;background:linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);object-fit:cover;}
+.folder-body{padding:12px;text-align:center;}
+.folder-title{font-weight:700;font-size:13px;color:var(--text-main)}
+.folder-count{font-size:10px;color:var(--text-muted);margin-top:3px}
+
+.web-search-box {display: flex; gap: 8px; margin-top: 10px;}
+.web-search-box button {flex: 1; margin-top: 0; font-size: 11px; padding: 10px 8px;}
+
+.fav-btn{position:absolute;top:8px;right:8px;background:rgba(255,255,255,0.9);border:1px solid var(--border-color);border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.1);z-index:5;}
+.fav-btn.active{color:#ffbb00;background:#fff;border-color:#ffbb00;}
+
+#viewer{display:none;position:fixed;inset:0;background:#000;z-index:50;flex-direction:column;touch-action:none}
+#viewer.on{display:flex}
+.vtop{display:flex;justify-content:space-between;padding:14px;background:rgba(0,0,0,0.85);z-index:2}
+.vtop button{width:auto;padding:6px 14px;background:rgba(255,255,255,0.2);color:#fff;border:none;border-radius:8px;font-weight:600}
+.vstage{flex:1;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.vstage img{position:absolute;max-width:85%;max-height:85%;object-fit:contain;cursor:grab;user-select:none;-webkit-user-drag:none;}
+.vstage img:active{cursor:grabbing}
+.vbottom{padding:14px;background:rgba(0,0,0,0.85);color:#fff;font-size:12px;z-index:2;text-align:center;}
+.bloqueado #controls{display:none}
+.bloqueado .vtop button.close{display:none}
+.bloqueado .vtop button#lockBtn{background:#fff;color:#000}
+</style>
 </head>
 <body>
 
-    <div class="header-container">
-        <img src="1792920682758.jpg" alt="Logotipo Toque Natural" class="logo-img">
-        <div class="brand-subtitle">Toque Natural · Nail Art Pro</div>
+<header>
+  <div class="top-admin-btn">
+    <button onclick="cambiarPestana('pro')">🔒 Jefa</button>
+  </div>
+
+  <div class="brand-logo-wrapper">
+    <!-- Logotipo conectado directamente con tu imagen en GitHub -->
+    <img id="logoImg" class="brand-logo" src="1792920682758.jpg" alt="Logotipo Toque Natural">
+  </div>
+  <div class="brand-subtext">TOQUE NATURAL · NAIL ART PRO</div>
+</header>
+
+<nav class="bottom-nav">
+  <button id="tPlantillas" class="active" onclick="cambiarPestana('plantillas')"><span>📁</span>Plantillas</button>
+  <button id="tFavoritos" onclick="cambiarPestana('favoritos')"><span>⭐</span>Favoritos</button>
+  <button id="tTrabajos" onclick="cambiarPestana('trabajos')"><span>💅</span>Trabajos</button>
+  <button id="tTrucos" onclick="cambiarPestana('trucos')"><span>💡</span>Trucos</button>
+  <button id="tComunidad" onclick="cambiarPestana('comunidad')"><span>💬</span>Comunidad</button>
+  <button id="tPro" onclick="cambiarPestana('pro')"><span>✨</span>PRO</button>
+</nav>
+
+<div id="secPlantillas">
+  <div id="vistaCarpetas">
+    <div class="box">
+      <b>🔍 Buscar en tus categorías</b>
+      <input type="text" id="inputBuscadorPlantillas" placeholder="Escribe para filtrar..." oninput="filtrarPlantillasGlobal()">
     </div>
 
-    <div class="search-box">
-        <div style="margin-bottom: 8px; font-size: 14px; font-weight: 600; color: #2d3748;">🔍 Buscar en tus categorías</div>
-        <input type="text" class="search-input" placeholder="Escribe para filtrar...">
+    <div class="box" id="boxCrearCat" style="display:none;">
+      <b>➕ Crear nueva categoría (Modo Jefa)</b>
+      <input type="text" id="nuevaCatNombre" placeholder="Nombre (ej. Colección Fiesta)">
+      <button class="action-btn" onclick="crearCategoriaNube()">Crear Categoría Cloud</button>
     </div>
 
-    <div class="categories-title">📁 Categorías de Plantillas:</div>
-    <div class="grid">
-        <div class="card">📁 Halloween</div>
-        <div class="card">📁 Flores</div>
-        <div class="card">📁 Mariposas</div>
-        <div class="card">📁 Corazones y románticos</div>
+    <div style="font-size:13px;font-weight:700;margin:14px 0 8px 4px;color:var(--primary-dark);">📁 Categorías de Plantillas:</div>
+    <div class="folder-grid" id="listaCarpetas"></div>
+
+    <div class="box" style="margin-top:16px;background:linear-gradient(135deg, #fff 0%, #f9f2ff 100%);border:1px dashed var(--primary);">
+      <b>🌐 Buscar inspiración en internet</b>
+      <p style="font-size:11px;color:var(--text-muted);margin:2px 0 8px;">Escribe lo que buscas y elige dónde buscar:</p>
+      <input type="text" id="busquedaWebInput" placeholder="Ej. Uñas flores, minimalista...">
+      <div class="web-search-box">
+        <button class="action-btn" style="background:#bd081c;" onclick="buscarEnPinterest()">Pinterest</button>
+        <button class="action-btn" style="background:#4285F4;" onclick="buscarEnGoogle()">Google Imágenes</button>
+      </div>
     </div>
+  </div>
+
+  <div id="vistaDetalleCarpeta" style="display:none;">
+    <button class="action-btn" style="width:auto;padding:8px 14px;margin-bottom:12px;background:#e2d1f9;color:var(--primary-dark);" onclick="volverCarpetas()">⬅️ Volver a Categorías</button>
+    <h3 id="tituloCarpetaActual" style="margin:5px 0 12px;font-size:16px;color:var(--primary-dark);"></h3>
+    
+    <div class="box" id="boxSubirPlantilla" style="display:none;">
+      <b>🗂️ Subir o Reemplazar Plantilla (Solo Jefa)</b>
+      <input type="file" id="fotoPlantilla" accept="image/*">
+      <button class="action-btn" onclick="procesarYGuardarPlantillaCloud()">Subir a la Nube</button>
+    </div>
+
+    <div class="grid" id="gridPlantillas"></div>
+  </div>
+</div>
+
+<div id="secFavoritos" style="display:none;">
+  <div class="box">
+    <b>⭐ Tus Plantillas Favoritas</b>
+  </div>
+  <div class="grid" id="gridFavoritos"></div>
+</div>
+
+<div id="secTrabajos" style="display:none;">
+  <div class="box">
+    <b>🔍 Buscar trabajo guardado</b>
+    <input type="text" id="inputBuscadorTrabajos" placeholder="Busca por cliente o esmalte..." oninput="renderTrabajos()">
+  </div>
+  <div class="box">
+    <b>📸 Registrador de trabajo realizado</b>
+    <input type="text" id="nombreClienta" placeholder="Nombre de la cliente/diseño">
+    <input type="text" id="coloresUsados" placeholder="Esmaltes usados">
+    <input type="file" id="fotoTrabajo" accept="image/*">
+    <button class="action-btn" onclick="procesarYGuardarTrabajo()">Guardar Trabajo</button>
+  </div>
+  <div class="grid" id="gridTrabajos"></div>
+</div>
+
+<div id="secTrucos" style="display:none;">
+  <div class="box">
+    <b>💡 Rincón de Trucos y Vídeos (Comunidad)</b>
+    <p style="font-size:11px;color:var(--text-muted);margin:3px 0 8px;">Comparte fotos o vídeos cortos explicando técnicas.</p>
+    <input type="text" id="inputTituloTruco" placeholder="Título (Ej: Cómo aplicar el gel sin burbujas)">
+    <textarea id="inputTextoTruco" rows="3" placeholder="Explica aquí el truco o consejo detallado..."></textarea>
+    <input type="file" id="archivoTruco" accept="image/*,video/*">
+    <button class="action-btn" onclick="guardarTrucoCloud()">Publicar Truco en la Nube</button>
+  </div>
+  <div id="listaTrucos"></div>
+</div>
+
+<div id="secComunidad" style="display:none;">
+  <div class="box">
+    <b>💬 Comunidad Exclusiva Toque Natural</b>
+    <p style="font-size:11px;color:var(--text-muted);margin:3px 0 8px;">Comparte tus diseños y comenta con otros profesionales.</p>
+    <input type="text" id="autorComunidad" placeholder="Tu nombre / Salón">
+    <textarea id="textoComunidad" rows="3" placeholder="Escribe tu mensaje..."></textarea>
+    <input type="file" id="fotoComunidad" accept="image/*">
+    <button class="action-btn" onclick="publicarComunidadCloud()">Publicar en Comunidad Cloud</button>
+  </div>
+  <div id="listaComunidad"></div>
+</div>
+
+<div id="secPro" style="display:none;">
+  <div class="box" style="text-align:center;border:2px solid var(--primary);background:linear-gradient(180deg, #fff 0%, #faf4ff 100%);">
+    <h3 style="color:var(--primary);margin-top:0;">✨ Toque Natural · Suscripción PRO</h3>
+    <p id="estadoSuscripcion" style="font-size:13px;color:var(--text-muted);line-height:1.4;">
+      Desbloquea todas las plantillas ilimitadas, el visor de calco, los vídeos de trucos y la comunidad por solo <b style="color:var(--primary);">9,99 € al mes</b>.
+    </p>
+
+    <div style="background:#fff;padding:14px;border-radius:14px;border:1px solid var(--border-color);margin:14px 0;text-align:left;box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+      <b>📱 Activa tu acceso mensual (30 días) o pon la contraseña de Jefa</b>
+      <ol style="font-size:11px;color:var(--text-muted);padding-left:16px;margin:6px 0 0 0;">
+        <li>Bizum de 9,99 € al: <b style="color:var(--primary);font-size:13px;">620 39 15 97</b></li>
+        <li>Pide tu código mensual por WhatsApp.</li>
+        <li>Escribe el código o contraseña aquí:</li>
+      </ol>
+      <input type="text" id="inputCodigoPro" placeholder="Introduce el código o 'JEFA'..." style="margin-top:10px;">
+      <button class="action-btn" style="margin-top:8px;" onclick="validarCodigoPro()">Activar Acceso</button>
+    </div>
+
+    <div id="panelAdmin" style="background:#f3eafa;padding:14px;border-radius:14px;border:1px dashed var(--primary);margin:14px 0;text-align:left;display:none;">
+      <b style="color:var(--primary-dark);">👑 Panel de Dueña (Jefa)</b>
+      <p style="font-size:11px;color:var(--text-muted);margin:3px 0 6px;">Crea o cambia el código mensual para tus clientes:</p>
+      <input type="text" id="inputNuevoCodigoMes" placeholder="Ej. DICIEMBRE26">
+      <button class="action-btn" style="margin-top:6px;background:var(--primary-dark);" onclick="guardarCodigoMensualAdmin()">Guardar Código para Clientes</button>
+    </div>
+
+    <button class="action-btn" style="background: #25d366; box-shadow: 0 4px 15px rgba(37,211,102,0.3); margin-top:10px;" onclick="window.open('https://wa.me/34620391597?text=Hola,%20quiero%20mi%20código%20mensual%20PRO%20de%20Toque%20Natural%20por%209,99€','_blank')">💬 Pedir código por WhatsApp</button>
+  </div>
+</div>
+
+<div id="viewer">
+  <div class="vtop">
+    <button class="close" onclick="cerrarViewer()">✕ Cerrar</button>
+    <button id="lockBtn" onclick="toggleLock()">🔒 BLOQUEAR</button>
+  </div>
+  <div class="vstage" id="vstage"><img id="imgGrande" alt="Ampliada"></div>
+  <div class="vbottom" id="controls">
+    Zoom: <input type="range" id="zoomRange" min="50" max="300" value="100" style="width:100%;accent-color:#9b51e0">
+  </div>
+</div>
+
+<script>
+// ==========================================
+// CONFIGURACIÓN DE FIREBASE (NUBE)
+// ==========================================
+const firebaseConfig = {
+  apiKey: "TU_API_KEY",
+  authDomain: "tu-proyecto.firebaseapp.com",
+  projectId: "tu-proyecto",
+  storageBucket: "tu-proyecto.appspot.com",
+  messagingSenderId: "TU_SENDER_ID",
+  appId: "TU_APP_ID"
+};
+
+firebase.initializeApp(firebaseConfig);
+const dbCloud = firebase.firestore();
+const storageCloud = firebase.storage();
+
+let categoriasCloud = [
+  "Halloween", "Flores", "Mariposas", "Corazones y románticos",
+  "Navidad", "San Valentín", "Cáritas y expresiones", "Pestañas",
+  "Animales", "Fantasía", "Dibujos animados / Disney", "Otros dibujos"
+];
+
+let plantillas = [];
+let trabajos = [];
+let trucos = [];
+let comunidad = [];
+let carpetaActual = null;
+
+function iniciarEscuchadoresNube() {
+  dbCloud.collection("plantillas").onSnapshot((snapshot) => {
+    plantillas = [];
+    snapshot.forEach((doc) => {
+      plantillas.push({ id: doc.id, ...doc.data() });
+    });
+    if(carpetaActual) renderPlantillasCarpeta();
+    else renderCarpetas();
+  });
+
+  dbCloud.collection("trucos").orderBy("id", "desc").onSnapshot((snapshot) => {
+    trucos = [];
+    snapshot.forEach((doc) => {
+      trucos.push({ id: doc.id, ...doc.data() });
+    });
+    renderTrucos();
+  });
+
+  dbCloud.collection("comunidad").orderBy("id", "desc").onSnapshot((snapshot) => {
+    comunidad = [];
+    snapshot.forEach((doc) => {
+      comunidad.push({ id: doc.id, ...doc.data() });
+    });
+    renderComunidad();
+  });
+}
+
+window.onload = function() {
+  verificarAccesoPro();
+  iniciarEscuchadoresNube();
+  cargarTrabajosLocales();
+  renderCarpetas();
+};
+
+function esAdmin() {
+  return localStorage.getItem('tn_es_admin') === 'true';
+}
+
+function esProActivo() {
+  let expira = localStorage.getItem('tn_pro_expira');
+  let ahora = Date.now();
+  return esAdmin() || (expira && ahora < parseInt(expira));
+}
+
+function verificarAccesoPro() {
+  let estadoTxt = document.getElementById('estadoSuscripcion');
+  let panelAdmin = document.getElementById('panelAdmin');
+  let adminActivo = esAdmin();
+  let boxCrear = document.getElementById('boxCrearCat');
+  let boxSubir = document.getElementById('boxSubirPlantilla');
+  
+  if(boxCrear) boxCrear.style.display = adminActivo ? 'block' : 'none';
+  if(boxSubir) boxSubir.style.display = adminActivo ? 'block' : 'none';
+  if(panelAdmin) panelAdmin.style.display = adminActivo ? 'block' : 'none';
+
+  if(estadoTxt) {
+    if(adminActivo) {
+      estadoTxt.innerHTML = `✨ <b style="color:green;">¡Modo Jefa Activo!</b> Tienes control total de la nube.`;
+    } else if(esProActivo()) {
+      estadoTxt.innerHTML = `✨ <b style="color:green;">¡Acceso PRO Activo!</b> Tienes acceso completo a todas las funciones.`;
+    } else {
+      estadoTxt.innerHTML = `Desbloquea todas las plantillas, vídeos de trucos y la comunidad por solo <b style="color:var(--primary);">9,99 € al mes</b>.`;
+    }
+  }
+}
+
+function validarCodigoPro() {
+  let codigoIngresado = document.getElementById('inputCodigoPro').value.trim();
+  if(!codigoIngresado) return alert("Introduce un código o contraseña.");
+
+  if(codigoIngresado.toUpperCase() === "JEFA" || codigoIngresado === "1234") {
+    localStorage.setItem('tn_es_admin', 'true');
+    localStorage.setItem('tn_pro_expira', Date.now() + 365*24*60*60*1000);
+    document.getElementById('inputCodigoPro').value = '';
+    verificarAccesoPro();
+    alert("¡Hola Jefa! Modo administración activado con éxito.");
+    cambiarPestana('plantillas');
+    return;
+  }
+
+  let codigoMesActual = localStorage.getItem('tn_codigo_mes_actual') || "NOVIEMBRE26";
+
+  if(codigoIngresado.toUpperCase() === codigoMesActual.toUpperCase()) {
+    let fechaExpiracion = Date.now() + (30 * 24 * 60 * 60 * 1000);
+    localStorage.setItem('tn_pro_expira', fechaExpiracion);
+    document.getElementById('inputCodigoPro').value = '';
+    verificarAccesoPro();
+    alert("¡Código validado con éxito! 30 días de acceso completo desbloqueados.");
+    cambiarPestana('plantillas');
+  } else {
+    alert("Código incorrecto. Realiza tu Bizum al 620391597 y consúltalo por WhatsApp.");
+  }
+}
+
+function guardarCodigoMensualAdmin() {
+  let nuevoCod = document.getElementById('inputNuevoCodigoMes').value.trim();
+  if(!nuevoCod) return alert("Escribe un código.");
+  localStorage.setItem('tn_codigo_mes_actual', nuevoCod.toUpperCase());
+  document.getElementById('inputNuevoCodigoMes').value = '';
+  alert("¡Código actualizado para las clientas: " + nuevoCod.toUpperCase() + "!");
+}
+
+function cambiarPestana(p) {
+  document.getElementById('secPlantillas').style.display = p === 'plantillas' ? 'block' : 'none';
+  document.getElementById('secFavoritos').style.display = p === 'favoritos' ? 'block' : 'none';
+  document.getElementById('secTrabajos').style.display = p === 'trabajos' ? 'block' : 'none';
+  document.getElementById('secTrucos').style.display = p === 'trucos' ? 'block' : 'none';
+  document.getElementById('secComunidad').style.display = p === 'comunidad' ? 'block' : 'none';
+  document.getElementById('secPro').style.display = p === 'pro' ? 'block' : 'none';
+
+  ['tPlantillas','tFavoritos','tTrabajos','tTrucos','tComunidad','tPro'].forEach(id => {
+    document.getElementById(id).classList.remove('active');
+  });
+  if(p === 'plantillas') document.getElementById('tPlantillas').classList.add('active');
+  if(p === 'favoritos') document.getElementById('tFavoritos').classList.add('active');
+  if(p === 'trabajos') document.getElementById('tTrabajos').classList.add('active');
+  if(p === 'trucos') document.getElementById('tTrucos').classList.add('active');
+  if(p === 'comunidad') document.getElementById('tComunidad').classList.add('active');
+  if(p === 'pro') document.getElementById('tPro').classList.add('active');
+
+  if(p === 'plantillas') volverCarpetas();
+  if(p === 'favoritos') renderFavoritos();
+  if(p === 'trabajos') renderTrabajos();
+  if(p === 'trucos') renderTrucos();
+  if(p === 'comunidad') renderComunidad();
+  if(p === 'pro') verificarAccesoPro();
+}
+
+function renderCarpetas(filtro = '') {
+  const contenedor = document.getElementById('listaCarpetas');
+  if(!contenedor) return;
+  let html = '';
+  let catsFiltradas = categoriasCloud.filter(cat => cat.toLowerCase().includes(filtro.toLowerCase()));
+
+  catsFiltradas.forEach(cat => {
+    let itemsEnCat = plantillas.filter(p => p.cat === cat);
+    let cant = itemsEnCat.length;
+    let portadaImg = itemsEnCat.length > 0 ? itemsEnCat[0].imagen : '';
+
+    let portadaHtml = portadaImg ? `<img src="${portadaImg}" class="folder-cover">` : `<div class="folder-cover" style="display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;font-size:13px;">📁 ${cat}</div>`;
+
+    html += `
+      <div class="folder-card" onclick="abrirCarpeta('${cat}')">
+        ${portadaHtml}
+        <div class="folder-body">
+          <div class="folder-title">📁 ${cat}</div>
+          <div class="folder-count">${cant} plantillas</div>
+        </div>
+      </div>
+    `;
+  });
+  contenedor.innerHTML = html;
+}
+
+function filtrarPlantillasGlobal() {
+  renderCarpetas(document.getElementById('inputBuscadorPlantillas').value);
+}
+
+function crearCategoriaNube() {
+  if(!esAdmin()) { alert("🔒 Solo la Jefa puede crear categorías."); return; }
+  const nombre = document.getElementById('nuevaCatNombre').value.trim();
+  if(!nombre) return alert("Escribe un nombre.");
+  if(categoriasCloud.includes(nombre)) return alert("Ya existe.");
+  categoriasCloud.push(nombre);
+  document.getElementById('nuevaCatNombre').value = '';
+  renderCarpetas();
+  alert("¡Categoría añadida!");
+}
+
+function abrirCarpeta(cat) {
+  carpetaActual = cat;
+  document.getElementById('vistaCarpetas').style.display = 'none';
+  document.getElementById('vistaDetalleCarpeta').style.display = 'block';
+  document.getElementById('tituloCarpetaActual').innerText = "Carpeta: " + cat;
+  renderPlantillasCarpeta();
+}
+
+function volverCarpetas() {
+  carpetaActual = null;
+  document.getElementById('vistaDetalleCarpeta').style.display = 'none';
+  document.getElementById('vistaCarpetas').style.display = 'block';
+  document.getElementById('inputBuscadorPlantillas').value = '';
+  renderCarpetas();
+}
+
+async function procesarYGuardarPlantillaCloud() {
+  if(!esAdmin()) { alert("🔒 Solo la Jefa puede subir plantillas."); return; }
+  const archivo = document.getElementById('fotoPlantilla').files[0];
+  if(!archivo) return alert("Selecciona una imagen.");
+
+  alert("Subiendo imagen a la nube...");
+  const storageRef = storageCloud.ref(`plantillas/${Date.now()}_${archivo.name}`);
+  const snapshot = await storageRef.put(archivo);
+  const downloadURL = await snapshot.ref.getDownloadURL();
+
+  await dbCloud.collection("plantillas").add({
+    id: Date.now().toString(),
+    cat: carpetaActual,
+    imagen: downloadURL
+  });
+
+  document.getElementById('fotoPlantilla').value = '';
+  alert("¡Plantilla subida a la nube correctamente para todas las clientas!");
+}
+
+function renderPlantillasCarpeta() {
+  const grid = document.getElementById('gridPlantillas');
+  let filtradas = plantillas.filter(p => p.cat === carpetaActual);
+  let adminActivo = esAdmin();
+  let proActivo = esProActivo();
+  
+  if(filtradas.length === 0) {
+    grid.innerHTML = '<p style="grid-column:span 2;text-align:center;color:var(--text-muted);font-size:12px;">Todavía no hay imágenes en esta categoría.</p>';
+    return;
+  }
+
+  let html = '';
+  filtradas.forEach((item, index) => {
+    let bloqueado = (!proActivo && index > 0);
+
+    if(bloqueado) {
+      html += `
+        <div class="card" style="background:#faf2ff;opacity:0.9;">
+          <div class="card-img-container" onclick="cambiarPestana('pro')" style="display:flex;align-items:center;justify-content:center;flex-direction:column;background:#f3eafa;">
+            <span style="font-size:28px;">🔒</span>
+            <span style="font-size:10px;font-weight:700;color:var(--primary);margin-top:4px;text-align:center;padding:0 4px;">BLOQUEADO (SUSCRIPCIÓN PRO)</span>
+          </div>
+          <p>Diseño Pro</p>
+        </div>
+      `;
+    } else {
+      let favoritosLocales = JSON.parse(localStorage.getItem('tn_favs') || '[]');
+      let esFav = favoritosLocales.includes(item.id);
+      let starClass = esFav ? 'fav-btn activo' : 'fav-btn';
+      let starSymbol = esFav ? '★' : '☆';
+
+      html += `
+        <div class="card">
+          <button class="${starClass}" onclick="toggleFavoritoLocal(event, '${item.id}')">${starSymbol}</button>
+          <div class="card-img-container" onclick="abrirViewer('${item.imagen}')">
+            <img src="${item.imagen}">
+          </div>
+          <p>Toca para calcar</p>
+          ${adminActivo ? `<button onclick="borrarPlantillaCloud('${item.id}')" style="background:#fff;color:#e74c3c;border:1px solid #e74c3c;padding:4px;font-size:10px;width:80%;margin:0 auto 6px;cursor:pointer;border-radius:6px;">🗑️ Borrar</button>` : ''}
+        </div>
+      `;
+    }
+  });
+  grid.innerHTML = html;
+}
+
+function toggleFavoritoLocal(evento, id) {
+  evento.stopPropagation();
+  if(!esProActivo()) { cambiarPestana('pro'); return; }
+  let favoritosLocales = JSON.parse(localStorage.getItem('tn_favs') || '[]');
+  let index = favoritosLocales.indexOf(id);
+  if(index > -1) {
+    favoritosLocales.splice(index, 1);
+  } else {
+    favoritosLocales.push(id);
+  }
+  localStorage.setItem('tn_favs', JSON.stringify(favoritosLocales));
+  if(carpetaActual) renderPlantillasCarpeta();
+}
+
+function renderFavoritos() {
+  const grid = document.getElementById('gridFavoritos');
+  let favoritosLocales = JSON.parse(localStorage.getItem('tn_favs') || '[]');
+  let favs = plantillas.filter(p => favoritosLocales.includes(p.id));
+
+  if(favs.length === 0) {
+    grid.innerHTML = '<p style="grid-column:span 2;text-align:center;color:var(--text-muted);font-size:12px;">No tienes favoritas aún.</p>';
+    return;
+  }
+  let html = '';
+  favs.forEach(item => {
+    html += `
+      <div class="card">
+        <button class="fav-btn active" onclick="toggleFavoritoLocal(event, '${item.id}')">★</button>
+        <div class="card-img-container" onclick="abrirViewer('${item.imagen}')">
+          <img src="${item.imagen}">
+        </div>
+        <p>📁 ${item.cat}</p>
+      </div>
+    `;
+  });
+  grid.innerHTML = html;
+}
+
+async function borrarPlantillaCloud(docId) {
+  if(!esAdmin()) { alert("🔒 Solo la Jefa puede borrar plantillas."); return; }
+  if(confirm("¿Borrar esta plantilla de la nube para todos?")) {
+    await dbCloud.collection("plantillas").doc(docId).delete();
+    alert("¡Eliminada de la nube!");
+  }
+}
+
+function cargarTrabajosLocales() {
+  trabajos = JSON.parse(localStorage.getItem('tn_trabajos') || '[]');
+  renderTrabajos();
+}
+
+function procesarYGuardarTrabajo() {
+  const nombre = document.getElementById('nombreClienta').value.trim();
+  const colores = document.getElementById('coloresUsados').value.trim();
+  const archivo = document.getElementById('fotoTrabajo').files[0];
+  if(!archivo) return alert("Selecciona la foto.");
+
+  const lector = new FileReader();
+  lector.onload = function(e) {
+    const nuevoTrabajo = { id: Date.now(), nombre: nombre || "Manicura", colores: colores || "N/A", imagen: e.target.result };
+    trabajos.push(nuevoTrabajo);
+    localStorage.setItem('tn_trabajos', JSON.stringify(trabajos));
+    document.getElementById('nombreClienta').value = '';
+    document.getElementById('coloresUsados').value = '';
+    document.getElementById('fotoTrabajo').value = '';
+    renderTrabajos();
+    alert("¡Trabajo guardado!");
+  };
+  lector.readAsDataURL(archivo);
+}
+
+function renderTrabajos() {
+  const grid = document.getElementById('gridTrabajos');
+  const textoBuscador = document.getElementById('inputBuscadorTrabajos') ? document.getElementById('inputBuscadorTrabajos').value.toLowerCase() : '';
+  let filtrados = trabajos.filter(t => t.nombre.toLowerCase().includes(textoBuscador) || t.colores.toLowerCase().includes(textoBuscador));
+
+  if(filtrados.length === 0) {
+    grid.innerHTML = '<p style="grid-column:span 2;text-align:center;color:var(--text-muted);font-size:12px;">No hay trabajos guardados.</p>';
+    return;
+  }
+  let html = '';
+  filtrados.forEach(t => {
+    html += `
+      <div class="card">
+        <div class="card-img-container" onclick="abrirViewer('${t.imagen}')">
+          <img src="${t.imagen}">
+        </div>
+        <p>💅 ${t.nombre}<br><small style="color:var(--text-muted)">${t.colores}</small></p>
+        <button onclick="borrarTrabajoLocal(${t.id})" style="background:#fff;color:#e74c3c;border:1px solid #e74c3c;padding:4px;font-size:10px;width:80%;margin:0 auto 6px;cursor:pointer;border-radius:6px;">🗑️ Borrar</button>
+      </div>
+    `;
+  });
+  grid.innerHTML = html;
+}
+
+function borrarTrabajoLocal(id) {
+  trabajos = trabajos.filter(t => t.id !== id);
+  localStorage.setItem('tn_trabajos', JSON.stringify(trabajos));
+  renderTrabajos();
+}
+
+async function guardarTrucoCloud() {
+  if(!esProActivo()) { cambiarPestana('pro'); return alert("🔒 Necesitas acceso PRO activo para publicar trucos."); }
+  const titulo = document.getElementById('inputTituloTruco').value.trim();
+  const texto = document.getElementById('inputTextoTruco').value.trim();
+  const archivo = document.getElementById('archivoTruco').files[0];
+  if(!titulo || !texto) return alert("Rellena el título y el texto del truco.");
+
+  let mediaUrl = "";
+  if(archivo) {
+    alert("Subiendo archivo multimedia a la nube...");
+    const storageRef = storageCloud.ref(`trucos/${Date.now()}_${archivo.name}`);
+    const snapshot = await storageRef.put(archivo);
+    mediaUrl = await snapshot.ref.getDownloadURL();
+  }
+
+  await dbCloud.collection("trucos").add({
+    id: Date.now(),
+    titulo,
+    texto,
+    media: mediaUrl
+  });
+
+  document.getElementById('inputTituloTruco').value = '';
+  document.getElementById('inputTextoTruco').value = '';
+  document.getElementById('archivoTruco').value = '';
+  alert("¡Truco publicado en la comunidad con éxito!");
+}
+
+function renderTrucos() {
+  const contenedor = document.getElementById('listaTrucos');
+  if(!contenedor) return;
+  if(trucos.length === 0) {
+    contenedor.innerHTML = '<div class="box"><p style="text-align:center;color:var(--text-muted);font-size:12px;">No hay trucos aún. ¡Sé la primera en publicar!</p></div>';
+    return;
+  }
+  let html = '';
+  trucos.forEach(t => {
+    let mediaHtml = '';
+    if(t.media) {
+      if(t.media.includes("video") || t.media.endsWith(".mp4")) {
+        mediaHtml = `<video src="${t.media}" controls style="width:100%;max-height:200px;border-radius:10px;margin-top:8px;background:#000;"></video>`;
+      } else {
+        mediaHtml = `<div class="card-img-container" onclick="abrirViewer('${t.media}')" style="margin-top:8px;border-radius:10px;overflow:hidden;"><img src="${t.media}"></div>`;
+      }
+    }
+    let borrarBtn = esAdmin() ? `<button onclick="borrarTrucoCloud('${t.id}')" style="background:#fff;color:#e74c3c;border:1px solid #e74c3c;padding:3px 8px;font-size:10px;width:auto;cursor:pointer;border-radius:6px;margin-top:8px;">🗑️ Borrar</button>` : '';
+    html += `
+      <div class="box">
+        <h4 style="margin:0 0 4px 0;color:var(--primary-dark);font-size:14px;">💡 ${t.titulo}</h4>
+        <p style="margin:0 0 8px 0;font-size:12px;color:var(--text-main);white-space:pre-wrap;">${t.texto}</p>
+        ${mediaHtml}
+        ${borrarBtn}
+      </div>
+    `;
+  });
+  contenedor.innerHTML = html;
+}
+
+async function borrarTrucoCloud(docId) {
+  if(!esAdmin()) { alert("🔒 Solo la Jefa puede borrar trucos."); return; }
+  if(confirm("¿Borrar truco?")) {
+    await dbCloud.collection("trucos").doc(docId).delete();
+  }
+}
+
+async function publicarComunidadCloud() {
+  if(!esProActivo()) { cambiarPestana('pro'); return alert("🔒 Necesitas acceso PRO activo para publicar en la comunidad."); }
+  const autor = document.getElementById('autorComunidad').value.trim();
+  const texto = document.getElementById('textoComunidad').value.trim();
+  const archivo = document.getElementById('fotoComunidad').files[0];
+
+  if(!autor || !texto) return alert("Rellena tu nombre y el texto.");
+
+  let imgUrl = "";
+  if(archivo) {
+    alert("Subiendo imagen a la comunidad...");
+    const storageRef = storageCloud.ref(`comunidad/${Date.now()}_${archivo.name}`);
+    const snapshot = await storageRef.put(archivo);
+    imgUrl = await snapshot.ref.getDownloadURL();
+  }
+
+  await dbCloud.collection("comunidad").add({
+    id: Date.now(),
+    autor,
+    texto,
+    imagen: imgUrl
+  });
+
+  document.getElementById('autorComunidad').value = '';
+  document.getElementById('textoComunidad').value = '';
+  document.getElementById('fotoComunidad').value = '';
+  alert("¡Publicado en la comunidad global!");
+}
+
+function renderComunidad() {
+  const contenedor = document.getElementById('listaComunidad');
+  if(!contenedor) return;
+  if(comunidad.length === 0) {
+    contenedor.innerHTML = '<div class="box"><p style="text-align:center;color:var(--text-muted);font-size:12px;">No hay publicaciones todavía.</p></div>';
+    return;
+  }
+  let html = '';
+  comunidad.forEach(p => {
+    let imagenHtml = p.imagen ? `<div class="card-img-container" onclick="abrirViewer('${p.imagen}')" style="margin-top:8px;border-radius:10px;overflow:hidden;"><img src="${p.imagen}"></div>` : '';
+    let borrarBtn = esAdmin() ? `<button onclick="borrarComunidadCloud('${p.id}')" style="background:#fff;color:#e74c3c;border:1px solid #e74c3c;padding:3px 8px;font-size:10px;width:auto;cursor:pointer;border-radius:6px;margin-top:8px;">🗑️ Borrar</button>` : '';
+    html += `
+      <div class="box">
+        <b style="color:var(--primary-dark);font-size:13px;">💬 ${p.autor}</b>
+        <p style="margin:4px 0;font-size:12px;color:var(--text-main);white-space:pre-wrap;">${p.texto}</p>
+        ${imagenHtml}
+        ${borrarBtn}
+      </div>
+    `;
+  });
+  contenedor.innerHTML = html;
+}
+
+async function borrarComunidadCloud(docId) {
+  if(!esAdmin()) { alert("🔒 Solo la Jefa puede borrar mensajes."); return; }
+  if(confirm("¿Borrar mensaje?")) {
+    await dbCloud.collection("comunidad").doc(docId).delete();
+  }
+}
+
+const viewer = document.getElementById('viewer');
+const imgGrande = document.getElementById('imgGrande');
+const zoomRange = document.getElementById('zoomRange');
+let bloqueado = false;
+let escala = 1, posX = 0, posY = 0;
+let startX = 0, startY = 0, dragging = false;
+
+function abrirViewer(src) {
+  imgGrande.src = src;
+  escala = 1; posX = 0; posY = 0;
+  zoomRange.value = 100;
+  actualizarTransform();
+  viewer.classList.add('on');
+  bloqueado = false;
+  viewer.classList.remove('bloqueado');
+  document.getElementById('lockBtn').innerText = "🔒 BLOQUEAR";
+}
+
+function cerrarViewer() {
+  if(!bloqueado) viewer.classList.remove('on');
+}
+
+function toggleLock() {
+  bloqueado = !bloqueado;
+  viewer.classList.toggle('bloqueado', bloqueado);
+  document.getElementById('lockBtn').innerText = bloqueado ? "🔓 DESBLOQUEAR" : "🔒 BLOQUEAR";
+}
+
+zoomRange.addEventListener('input', (e) => {
+  escala = e.target.value / 100;
+  actualizarTransform();
+});
+
+function actualizarTransform() {
+  imgGrande.style.transform = `translate(${posX}px, ${posY}px) scale(${escala})`;
+}
+
+imgGrande.addEventListener('pointerdown', (e) => {
+  if(bloqueado) return;
+  dragging = true;
+  startX = e.clientX - posX;
+  startY = e.clientY - posY;
+  imgGrande.setPointerCapture(e.pointerId);
+});
+
+imgGrande.addEventListener('pointermove', (e) => {
+  if(!dragging || bloqueado) return;
+  posX = e.clientX - startX;
+  posY = e.clientY - startY;
+  actualizarTransform();
+});
+
+imgGrande.addEventListener('pointerup', (e) => {
+  dragging = false;
+  try { imgGrande.releasePointerCapture(e.pointerId); } catch(err) {}
+});
+
+function buscarEnPinterest() {
+  const consulta = document.getElementById('busquedaWebInput').value.trim();
+  if(!consulta) { alert("Escribe algo para buscar."); return; }
+  window.open(`https://www.pinterest.com/search/pins/?q=${encodeURIComponent(consulta + ' nail art')}`, '_blank');
+}
+
+function buscarEnGoogle() {
+  const consulta = document.getElementById('busquedaWebInput').value.trim();
+  if(!consulta) { alert("Escribe algo para buscar."); return; }
+  window.open(`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(consulta + ' nail art')}`, '_blank');
+}
+</script>
 
 </body>
 </html>
