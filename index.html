@@ -134,7 +134,7 @@ button.action-btn:hover{filter: brightness(1.1);}
 
     <div class="box" id="boxCrearCat" style="display:none;">
       <b>➕ Crear nueva categoría (Modo Jefa)</b>
-      <input type="text" id="nuevaCatNombre" placeholder="Nombre (ej. Colección Fiesta)">
+      <input type="text" id="nuevaCatNombre" placeholder="Nombre (ej. Halloween, Flores...)">
       <button class="action-btn" onclick="crearCategoriaLocal()">Crear Categoría</button>
     </div>
 
@@ -153,3 +153,395 @@ button.action-btn:hover{filter: brightness(1.1);}
   </div>
 
   <div id="vistaDetalleCarpeta" style="display:none;">
+    <button class="action-btn" style="width:auto;padding:8px 14px;margin-bottom:12px;background:#e2d1f9;color:var(--primary-dark);" onclick="volverCarpetas()">⬅️ Volver a Categorías</button>
+    <h3 id="tituloCarpetaActual" style="margin:5px 0 12px;font-size:16px;color:var(--primary-dark);"></h3>
+    
+    <div class="box" id="boxSubirPlantilla" style="display:none;">
+      <b>🗂️ Subir Plantilla a la Nube (Solo Jefa)</b>
+      <input type="file" id="fotoPlantilla" accept="image/*">
+      <button class="action-btn" onclick="subirPlantillaFirebase()">Subir a la Nube</button>
+    </div>
+
+    <div class="grid" id="gridPlantillas"></div>
+  </div>
+</div>
+
+<div id="secFavoritos" style="display:none;">
+  <div class="box">
+    <b>⭐ Tus Plantillas Favoritas</b>
+  </div>
+  <div class="grid" id="gridFavoritos"></div>
+</div>
+
+<div id="secTrabajos" style="display:none;">
+  <div class="box">
+    <b>🔍 Buscar trabajo guardado</b>
+    <input type="text" id="inputBuscadorTrabajos" placeholder="Busca por cliente o esmalte..." oninput="renderTrabajos()">
+  </div>
+  <div class="box">
+    <b>📸 Registrador de trabajo realizado</b>
+    <input type="text" id="nombreClienta" placeholder="Nombre de la cliente/diseño">
+    <input type="text" id="coloresUsados" placeholder="Esmaltes usados">
+    <input type="file" id="fotoTrabajo" accept="image/*">
+    <button class="action-btn" onclick="procesarYGuardarTrabajo()">Guardar Trabajo</button>
+  </div>
+  <div class="grid" id="gridTrabajos"></div>
+</div>
+
+<div id="secTrucos" style="display:none;">
+  <div class="box">
+    <b>💡 Rincón de Trucos y Vídeos</b>
+    <p style="font-size:11px;color:var(--text-muted);margin:3px 0 8px;">Comparte fotos o vídeos cortos explicando técnicas.</p>
+    <input type="text" id="inputTituloTruco" placeholder="Título (Ej: Cómo aplicar el gel sin burbujas)">
+    <textarea id="inputTextoTruco" rows="3" placeholder="Explica aquí el truco o consejo detallado..."></textarea>
+    <input type="file" id="archivoTruco" accept="image/*,video/*">
+    <button class="action-btn" onclick="guardarTrucoLocal()">Publicar Truco</button>
+  </div>
+  <div id="listaTrucos"></div>
+</div>
+
+<div id="secComunidad" style="display:none;">
+  <div class="box">
+    <b>💬 Comunidad Exclusiva Toque Natural</b>
+    <p style="font-size:11px;color:var(--text-muted);margin:3px 0 8px;">Comparte tus diseños y comenta con otros profesionales.</p>
+    <input type="text" id="autorComunidad" placeholder="Tu nombre / Salón">
+    <textarea id="textoComunidad" rows="3" placeholder="Escribe tu mensaje..."></textarea>
+    <input type="file" id="fotoComunidad" accept="image/*">
+    <button class="action-btn" onclick="publicarComunidadLocal()">Publicar en Comunidad</button>
+  </div>
+  <div id="listaComunidad"></div>
+</div>
+
+<div id="secPro" style="display:none;">
+  <div class="box" style="text-align:center;border:2px solid var(--primary);background:linear-gradient(180deg, #fff 0%, #faf4ff 100%);">
+    <h3 style="color:var(--primary);margin-top:0;">✨ Toque Natural · Suscripción PRO</h3>
+    <p id="estadoSuscripcion" style="font-size:13px;color:var(--text-muted);line-height:1.4;">
+      Desbloquea todas las plantillas ilimitadas, el visor de calco y los contenidos por solo <b style="color:var(--primary);">9,99 € al mes</b>.
+    </p>
+
+    <div style="background:#fff;padding:14px;border-radius:14px;border:1px solid var(--border-color);margin:14px 0;text-align:left;box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+      <b>📱 Introduce tu contraseña de Jefa o código mensual</b>
+      <input type="text" id="inputCodigoPro" placeholder="Introduce tu clave secreta..." style="margin-top:10px;">
+      <button class="action-btn" style="margin-top:8px;" onclick="validarCodigoPro()">Activar Acceso</button>
+    </div>
+
+    <button class="action-btn" style="background: #25d366; box-shadow: 0 4px 15px rgba(37,211,102,0.3); margin-top:10px;" onclick="window.open('https://wa.me/34620391597?text=Hola,%20quiero%20mi%20código%20mensual%20PRO%20de%20Toque%20Natural%20por%209,99€','_blank')">💬 Pedir código por WhatsApp</button>
+  </div>
+</div>
+
+<div id="viewer">
+  <div class="vtop">
+    <button class="close" onclick="cerrarViewer()">✕ Cerrar</button>
+    <button id="lockBtn" onclick="toggleLock()">🔒 BLOQUEAR</button>
+  </div>
+  <div class="vstage" id="vstage"><img id="imgGrande" alt="Ampliada"></div>
+  <div class="vbottom" id="controls">
+    Zoom: <input type="range" id="zoomRange" min="50" max="300" value="100" style="width:100%;accent-color:#9b51e0">
+  </div>
+</div>
+
+<script>
+let categoriasCloud = JSON.parse(localStorage.getItem('tn_categorias') || JSON.stringify([
+  "Halloween", "Flores", "Mariposas", "Corazones y románticos",
+  "Navidad", "San Valentín", "Cáritas y expresiones", "Pestañas",
+  "Animales", "Fantasía", "Dibujos animados / Disney", "Otros dibujos"
+]));
+
+let plantillas = [];
+let trabajos = JSON.parse(localStorage.getItem('tn_trabajos') || '[]');
+let trucos = JSON.parse(localStorage.getItem('tn_trucos') || '[]');
+let comunidad = JSON.parse(localStorage.getItem('tn_comunidad') || '[]');
+let carpetaActual = null;
+
+window.addEventListener('firebaseListo', async () => {
+  await cargarPlantillasFirebase();
+  verificarAccesoPro();
+  renderCarpetas();
+});
+
+async function cargarPlantillasFirebase() {
+  try {
+    const querySnapshot = await window.getDocs(window.colRef);
+    plantillas = [];
+    querySnapshot.forEach((docSnap) => {
+      plantillas.push({ id: docSnap.id, ...docSnap.data() });
+    });
+    if(carpetaActual) renderPlantillasCarpeta();
+    renderCarpetas();
+  } catch(e) {
+    console.error("Error al cargar de Firebase:", e);
+  }
+}
+
+function esAdmin() {
+  return localStorage.getItem('tn_es_admin') === 'true';
+}
+
+function esProActivo() {
+  let expira = localStorage.getItem('tn_pro_expira');
+  let ahora = Date.now();
+  return esAdmin() || (expira && ahora < parseInt(expira));
+}
+
+function verificarAccesoPro() {
+  let estadoTxt = document.getElementById('estadoSuscripcion');
+  let adminActivo = esAdmin();
+  let boxCrear = document.getElementById('boxCrearCat');
+  let boxSubir = document.getElementById('boxSubirPlantilla');
+  
+  if(boxCrear) boxCrear.style.display = adminActivo ? 'block' : 'none';
+  if(boxSubir) boxSubir.style.display = adminActivo ? 'block' : 'none';
+
+  if(estadoTxt) {
+    if(adminActivo) {
+      estadoTxt.innerHTML = `✨ <b style="color:green;">¡Modo Jefa Activo!</b> Tienes control total en la nube.`;
+    } else if(esProActivo()) {
+      estadoTxt.innerHTML = `✨ <b style="color:green;">¡Acceso PRO Activo!</b>`;
+    } else {
+      estadoTxt.innerHTML = `Desbloquea todas las plantillas y funciones por solo <b style="color:var(--primary);">9,99 € al mes</b>.`;
+    }
+  }
+}
+
+function validarCodigoPro() {
+  let codigoIngresado = document.getElementById('inputCodigoPro').value.trim();
+  if(!codigoIngresado) return alert("Introduce una contraseña o código.");
+
+  if(codigoIngresado === "Jefa22" || codigoIngresado === "jefa22") {
+    localStorage.setItem('tn_es_admin', 'true');
+    localStorage.setItem('tn_pro_expira', Date.now() + 365*24*60*60*1000);
+    document.getElementById('inputCodigoPro').value = '';
+    verificarAccesoPro();
+    alert("¡Hola Jefa! Modo administración activado con éxito.");
+    cambiarPestana('plantillas');
+    return;
+  }
+
+  let codigoMesActual = localStorage.getItem('tn_codigo_mes_actual') || "NOVIEMBRE26";
+  if(codigoIngresado.toUpperCase() === codigoMesActual.toUpperCase()) {
+    let fechaExpiracion = Date.now() + (30 * 24 * 60 * 60 * 1000);
+    localStorage.setItem('tn_pro_expira', fechaExpiracion);
+    document.getElementById('inputCodigoPro').value = '';
+    verificarAccesoPro();
+    alert("¡Código validado con éxito!");
+    cambiarPestana('plantillas');
+  } else {
+    alert("Contraseña o código incorrecto.");
+  }
+}
+
+function cambiarPestana(p) {
+  document.getElementById('secPlantillas').style.display = p === 'plantillas' ? 'block' : 'none';
+  document.getElementById('secFavoritos').style.display = p === 'favoritos' ? 'block' : 'none';
+  document.getElementById('secTrabajos').style.display = p === 'trabajos' ? 'block' : 'none';
+  document.getElementById('secTrucos').style.display = p === 'trucos' ? 'block' : 'none';
+  document.getElementById('secComunidad').style.display = p === 'comunidad' ? 'block' : 'none';
+  document.getElementById('secPro').style.display = p === 'pro' ? 'block' : 'none';
+
+  ['tPlantillas','tFavoritos','tTrabajos','tTrucos','tComunidad','tPro'].forEach(id => {
+    let btn = document.getElementById(id);
+    if(btn) btn.classList.remove('active');
+  });
+  let btnActive = document.getElementById('t' + p.charAt(0).toUpperCase() + p.slice(1));
+  if(btnActive) btnActive.classList.add('active');
+
+  if(p === 'plantillas') volverCarpetas();
+  if(p === 'favoritos') renderFavoritos();
+  if(p === 'trabajos') renderTrabajos();
+  if(p === 'trucos') renderTrucos();
+  if(p === 'comunidad') renderComunidad();
+  if(p === 'pro') verificarAccesoPro();
+}
+
+function renderCarpetas(filtro = '') {
+  const contenedor = document.getElementById('listaCarpetas');
+  if(!contenedor) return;
+  let html = '';
+  let catsFiltradas = categoriasCloud.filter(cat => cat.toLowerCase().includes(filtro.toLowerCase()));
+
+  catsFiltradas.forEach(cat => {
+    let itemsEnCat = plantillas.filter(p => p.cat === cat);
+    let cant = itemsEnCat.length;
+    let portadaImg = itemsEnCat.length > 0 ? itemsEnCat[0].imagen : '';
+
+    let portadaHtml = portadaImg ? `<img src="${portadaImg}" class="folder-cover">` : `<div class="folder-cover" style="display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;font-size:13px;">📁 ${cat}</div>`;
+
+    html += `
+      <div class="folder-card" onclick="abrirCarpeta('${cat}')">
+        ${portadaHtml}
+        <div class="folder-body">
+          <div class="folder-title">📁 ${cat}</div>
+          <div class="folder-count">${cant} plantillas</div>
+        </div>
+      </div>
+    `;
+  });
+  contenedor.innerHTML = html;
+}
+
+function filtrarPlantillasGlobal() {
+  renderCarpetas(document.getElementById('inputBuscadorPlantillas').value);
+}
+
+function crearCategoriaLocal() {
+  if(!esAdmin()) { alert("🔒 Solo la Jefa puede crear categorías."); return; }
+  const nombre = document.getElementById('nuevaCatNombre').value.trim();
+  if(!nombre) return alert("Escribe un nombre.");
+  if(categoriasCloud.includes(nombre)) return alert("Ya existe.");
+  categoriasCloud.push(nombre);
+  localStorage.setItem('tn_categorias', JSON.stringify(categoriasCloud));
+  document.getElementById('nuevaCatNombre').value = '';
+  renderCarpetas();
+  alert("¡Categoría añadida!");
+}
+
+function abrirCarpeta(cat) {
+  carpetaActual = cat;
+  document.getElementById('vistaCarpetas').style.display = 'none';
+  document.getElementById('vistaDetalleCarpeta').style.display = 'block';
+  document.getElementById('tituloCarpetaActual').innerText = "Carpeta: " + cat;
+  renderPlantillasCarpeta();
+}
+
+function volverCarpetas() {
+  carpetaActual = null;
+  document.getElementById('vistaDetalleCarpeta').style.display = 'none';
+  document.getElementById('vistaCarpetas').style.display = 'block';
+  let buscador = document.getElementById('inputBuscadorPlantillas');
+  if(buscador) buscador.value = '';
+  renderCarpetas();
+}
+
+async function subirPlantillaFirebase() {
+  if(!esAdmin()) { alert("🔒 Solo la Jefa puede subir plantillas."); return; }
+  const archivoInput = document.getElementById('fotoPlantilla');
+  if(!archivoInput || !archivoInput.files[0]) return alert("Selecciona una imagen.");
+  const archivo = archivoInput.files[0];
+
+  alert("Subiendo imagen a la nube... Un momento por favor.");
+
+  const lector = new FileReader();
+  lector.onload = async function(e) {
+    try {
+      const base64Data = e.target.result;
+      const nombreArchivo = 'plantillas/' + Date.now() + '_' + archivo.name;
+      const storageRef = window.ref(window.fbStorage, nombreArchivo);
+      
+      await window.uploadString(storageRef, base64Data, 'data_url');
+      const downloadURL = await window.getDownloadURL(storageRef);
+
+      await window.addDoc(window.colRef, {
+        cat: carpetaActual,
+        imagen: downloadURL,
+        path: nombreArchivo,
+        creado: Date.now()
+      });
+
+      archivoInput.value = '';
+      await cargarPlantillasFirebase();
+      alert("¡Plantilla subida a la nube con éxito para todo el mundo!");
+    } catch(err) {
+      console.error("Error al subir:", err);
+      alert("Hubo un error al subir la imagen. Comprueba tu conexión.");
+    }
+  };
+  lector.readAsDataURL(archivo);
+}
+
+function renderPlantillasCarpeta() {
+  const grid = document.getElementById('gridPlantillas');
+  if(!grid) return;
+  let filtradas = plantillas.filter(p => p.cat === carpetaActual);
+  let adminActivo = esAdmin();
+  
+  if(filtradas.length === 0) {
+    grid.innerHTML = '<p style="grid-column:span 2;text-align:center;color:var(--text-muted);font-size:12px;">Todavía no hay imágenes en esta categoría en la nube. ¡Sube la primera!</p>';
+    return;
+  }
+
+  let html = '';
+  filtradas.forEach((item) => {
+    let favoritosLocales = JSON.parse(localStorage.getItem('tn_favs') || '[]');
+    let esFav = favoritosLocales.includes(item.id);
+    let starClass = esFav ? 'fav-btn activo' : 'fav-btn';
+    let starSymbol = esFav ? '★' : '☆';
+
+    html += `
+      <div class="card">
+        <button class="${starClass}" onclick="toggleFavoritoLocal(event, '${item.id}')">${starSymbol}</button>
+        <div class="card-img-container" onclick="abrirViewer('${item.imagen}')">
+          <img src="${item.imagen}">
+        </div>
+        <p>Toca para calcar</p>
+        ${adminActivo ? `<button onclick="borrarPlantillaFirebase('${item.id}', '${item.path || ''}')" style="background:#fff;color:#e74c3c;border:1px solid #e74c3c;padding:4px;font-size:10px;width:80%;margin:0 auto 6px;cursor:pointer;border-radius:6px;">🗑️ Borrar</button>` : ''}
+      </div>
+    `;
+  });
+  grid.innerHTML = html;
+}
+
+async function borrarPlantillaFirebase(id, path) {
+  if(!esAdmin()) { alert("🔒 Solo la Jefa puede borrar plantillas."); return; }
+  if(confirm("¿Seguro que quieres borrar esta plantilla de la nube?")) {
+    try {
+      await window.deleteDoc(window.doc(window.fbDb, "plantillas_nailart", id));
+      if(path) {
+        const storageRef = window.ref(window.fbStorage, path);
+        await window.deleteObject(storageRef).catch(err => console.log("No se encontró archivo en Storage"));
+      }
+      await cargarPlantillasFirebase();
+      alert("Plantilla borrada con éxito.");
+    } catch(e) {
+      console.error("Error al borrar:", e);
+      alert("No se pudo borrar.");
+    }
+  }
+}
+
+function toggleFavoritoLocal(evento, id) {
+  evento.stopPropagation();
+  let favoritosLocales = JSON.parse(localStorage.getItem('tn_favs') || '[]');
+  let index = favoritosLocales.indexOf(id);
+  if(index > -1) {
+    favoritosLocales.splice(index, 1);
+  } else {
+    favoritosLocales.push(id);
+  }
+  localStorage.setItem('tn_favs', JSON.stringify(favoritosLocales));
+  if(carpetaActual) renderPlantillasCarpeta();
+}
+
+function renderFavoritos() {
+  const grid = document.getElementById('gridFavoritos');
+  if(!grid) return;
+  let favoritosLocales = JSON.parse(localStorage.getItem('tn_favs') || '[]');
+  let favs = plantillas.filter(p => favoritosLocales.includes(p.id));
+
+  if(favs.length === 0) {
+    grid.innerHTML = '<p style="grid-column:span 2;text-align:center;color:var(--text-muted);font-size:12px;">No tienes favoritas aún.</p>';
+    return;
+  }
+  let html = '';
+  favs.forEach(item => {
+    html += `
+      <div class="card">
+        <button class="fav-btn active" onclick="toggleFavoritoLocal(event, '${item.id}')">★</button>
+        <div class="card-img-container" onclick="abrirViewer('${item.imagen}')">
+          <img src="${item.imagen}">
+        </div>
+        <p>📁 ${item.cat}</p>
+      </div>
+    `;
+  });
+  grid.innerHTML = html;
+}
+
+function procesarYGuardarTrabajo() {
+  const nombre = document.getElementById('nombreClienta').value.trim();
+  const colores = document.getElementById('coloresUsados').value.trim();
+  const archivoInput = document.getElementById('fotoTrabajo');
+  if(!archivoInput || !archivoInput.files[0]) return alert("Selecciona la foto.");
+  const archivo = archivoInput.files[0];
+
+  const lector = new FileReader();
+  
