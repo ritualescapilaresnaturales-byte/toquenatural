@@ -5,11 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>Toque Natural · Nail Art PRO</title>
 
-<!-- Importar Firebase SDKs -->
+<!-- Importar Firebase SDKs (Firestore gratuito) -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-  import { getStorage, ref, uploadString, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyA9tMOYwvXMVNC1fe0UQG2Zs3GE2-sVPNA",
@@ -24,7 +23,6 @@
   try {
     const app = initializeApp(firebaseConfig);
     window.fbDb = getFirestore(app);
-    window.fbStorage = getStorage(app);
     window.colRef = collection(window.fbDb, "plantillas_nailart");
   } catch(err) {
     console.error("Error Firebase:", err);
@@ -438,16 +436,11 @@ async function subirPlantillaFirebase() {
   lector.onload = async function(e) {
     try {
       const base64Data = e.target.result;
-      const nombreArchivo = 'plantillas/' + Date.now() + '_' + archivo.name;
-      const storageRef = window.ref(window.fbStorage, nombreArchivo);
       
-      await window.uploadString(storageRef, base64Data, 'data_url');
-      const downloadURL = await window.getDownloadURL(storageRef);
-
+      // Guardar directamente en la base de datos Firestore (100% gratis y sin límites de Storage)
       await window.addDoc(window.colRef, {
         cat: carpetaActual,
-        imagen: downloadURL,
-        path: nombreArchivo,
+        imagen: base64Data,
         creado: Date.now()
       });
 
@@ -487,22 +480,18 @@ function renderPlantillasCarpeta() {
           <img src="${item.imagen}">
         </div>
         <p>Toca para calcar</p>
-        ${adminActivo ? `<button onclick="borrarPlantillaFirebase('${item.id}', '${item.path || ''}')" style="background:#fff;color:#e74c3c;border:1px solid #e74c3c;padding:4px;font-size:10px;width:80%;margin:0 auto 6px;cursor:pointer;border-radius:6px;">🗑️ Borrar</button>` : ''}
+        ${adminActivo ? `<button onclick="borrarPlantillaFirebase('${item.id}')" style="background:#fff;color:#e74c3c;border:1px solid #e74c3c;padding:4px;font-size:10px;width:80%;margin:0 auto 6px;cursor:pointer;border-radius:6px;">🗑️ Borrar</button>` : ''}
       </div>
     `;
   });
   grid.innerHTML = html;
 }
 
-async function borrarPlantillaFirebase(id, path) {
+async function borrarPlantillaFirebase(id) {
   if(!esAdmin()) { alert("🔒 Solo la Jefa puede borrar plantillas."); return; }
   if(confirm("¿Seguro que quieres borrar esta plantilla de la nube?")) {
     try {
       await window.deleteDoc(window.doc(window.fbDb, "plantillas_nailart", id));
-      if(path) {
-        const storageRef = window.ref(window.fbStorage, path);
-        await window.deleteObject(storageRef).catch(err => console.log("No se encontró archivo"));
-      }
       await cargarPlantillasFirebase();
       alert("Plantilla borrada con éxito.");
     } catch(e) {
