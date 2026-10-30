@@ -5,11 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>Toque Natural · Nail Art PRO</title>
 
-<!-- SDK de Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
-
 <style>
 :root {
   --bg-gradient: linear-gradient(135deg, #fdfbfd 0%, #f4eef8 100%);
@@ -85,11 +80,10 @@ button.action-btn:hover{filter: brightness(1.1);}
 
 <header>
   <div class="top-admin-btn">
-    <button onclick="cambiarPestana('pro')">🔒 Jefa</button>
+    <button onclick="cambiarPestana('pro')">🔒 Acceso</button>
   </div>
 
   <div class="brand-logo-wrapper">
-    <!-- Logotipo conectado directamente con tu imagen en GitHub -->
     <img id="logoImg" class="brand-logo" src="1792920682758.jpg" alt="Logotipo Toque Natural">
   </div>
   <div class="brand-subtext">TOQUE NATURAL · NAIL ART PRO</div>
@@ -114,7 +108,7 @@ button.action-btn:hover{filter: brightness(1.1);}
     <div class="box" id="boxCrearCat" style="display:none;">
       <b>➕ Crear nueva categoría (Modo Jefa)</b>
       <input type="text" id="nuevaCatNombre" placeholder="Nombre (ej. Colección Fiesta)">
-      <button class="action-btn" onclick="crearCategoriaNube()">Crear Categoría Cloud</button>
+      <button class="action-btn" onclick="crearCategoriaLocal()">Crear Categoría</button>
     </div>
 
     <div style="font-size:13px;font-weight:700;margin:14px 0 8px 4px;color:var(--primary-dark);">📁 Categorías de Plantillas:</div>
@@ -138,7 +132,7 @@ button.action-btn:hover{filter: brightness(1.1);}
     <div class="box" id="boxSubirPlantilla" style="display:none;">
       <b>🗂️ Subir o Reemplazar Plantilla (Solo Jefa)</b>
       <input type="file" id="fotoPlantilla" accept="image/*">
-      <button class="action-btn" onclick="procesarYGuardarPlantillaCloud()">Subir a la Nube</button>
+      <button class="action-btn" onclick="guardarPlantillaLocal()">Guardar Plantilla</button>
     </div>
 
     <div class="grid" id="gridPlantillas"></div>
@@ -169,12 +163,12 @@ button.action-btn:hover{filter: brightness(1.1);}
 
 <div id="secTrucos" style="display:none;">
   <div class="box">
-    <b>💡 Rincón de Trucos y Vídeos (Comunidad)</b>
+    <b>💡 Rincón de Trucos y Vídeos</b>
     <p style="font-size:11px;color:var(--text-muted);margin:3px 0 8px;">Comparte fotos o vídeos cortos explicando técnicas.</p>
     <input type="text" id="inputTituloTruco" placeholder="Título (Ej: Cómo aplicar el gel sin burbujas)">
     <textarea id="inputTextoTruco" rows="3" placeholder="Explica aquí el truco o consejo detallado..."></textarea>
     <input type="file" id="archivoTruco" accept="image/*,video/*">
-    <button class="action-btn" onclick="guardarTrucoCloud()">Publicar Truco en la Nube</button>
+    <button class="action-btn" onclick="guardarTrucoLocal()">Publicar Truco</button>
   </div>
   <div id="listaTrucos"></div>
 </div>
@@ -186,7 +180,7 @@ button.action-btn:hover{filter: brightness(1.1);}
     <input type="text" id="autorComunidad" placeholder="Tu nombre / Salón">
     <textarea id="textoComunidad" rows="3" placeholder="Escribe tu mensaje..."></textarea>
     <input type="file" id="fotoComunidad" accept="image/*">
-    <button class="action-btn" onclick="publicarComunidadCloud()">Publicar en Comunidad Cloud</button>
+    <button class="action-btn" onclick="publicarComunidadLocal()">Publicar en Comunidad</button>
   </div>
   <div id="listaComunidad"></div>
 </div>
@@ -195,25 +189,13 @@ button.action-btn:hover{filter: brightness(1.1);}
   <div class="box" style="text-align:center;border:2px solid var(--primary);background:linear-gradient(180deg, #fff 0%, #faf4ff 100%);">
     <h3 style="color:var(--primary);margin-top:0;">✨ Toque Natural · Suscripción PRO</h3>
     <p id="estadoSuscripcion" style="font-size:13px;color:var(--text-muted);line-height:1.4;">
-      Desbloquea todas las plantillas ilimitadas, el visor de calco, los vídeos de trucos y la comunidad por solo <b style="color:var(--primary);">9,99 € al mes</b>.
+      Desbloquea todas las plantillas ilimitadas, el visor de calco y los contenidos por solo <b style="color:var(--primary);">9,99 € al mes</b>.
     </p>
 
     <div style="background:#fff;padding:14px;border-radius:14px;border:1px solid var(--border-color);margin:14px 0;text-align:left;box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
-      <b>📱 Activa tu acceso mensual (30 días) o pon la contraseña de Jefa</b>
-      <ol style="font-size:11px;color:var(--text-muted);padding-left:16px;margin:6px 0 0 0;">
-        <li>Bizum de 9,99 € al: <b style="color:var(--primary);font-size:13px;">620 39 15 97</b></li>
-        <li>Pide tu código mensual por WhatsApp.</li>
-        <li>Escribe el código o contraseña aquí:</li>
-      </ol>
-      <input type="text" id="inputCodigoPro" placeholder="Introduce el código o 'JEFA'..." style="margin-top:10px;">
+      <b>📱 Introduce tu contraseña de Jefa o código mensual</b>
+      <input type="text" id="inputCodigoPro" placeholder="Introduce tu clave secreta..." style="margin-top:10px;">
       <button class="action-btn" style="margin-top:8px;" onclick="validarCodigoPro()">Activar Acceso</button>
-    </div>
-
-    <div id="panelAdmin" style="background:#f3eafa;padding:14px;border-radius:14px;border:1px dashed var(--primary);margin:14px 0;text-align:left;display:none;">
-      <b style="color:var(--primary-dark);">👑 Panel de Dueña (Jefa)</b>
-      <p style="font-size:11px;color:var(--text-muted);margin:3px 0 6px;">Crea o cambia el código mensual para tus clientes:</p>
-      <input type="text" id="inputNuevoCodigoMes" placeholder="Ej. DICIEMBRE26">
-      <button class="action-btn" style="margin-top:6px;background:var(--primary-dark);" onclick="guardarCodigoMensualAdmin()">Guardar Código para Clientes</button>
     </div>
 
     <button class="action-btn" style="background: #25d366; box-shadow: 0 4px 15px rgba(37,211,102,0.3); margin-top:10px;" onclick="window.open('https://wa.me/34620391597?text=Hola,%20quiero%20mi%20código%20mensual%20PRO%20de%20Toque%20Natural%20por%209,99€','_blank')">💬 Pedir código por WhatsApp</button>
@@ -232,65 +214,20 @@ button.action-btn:hover{filter: brightness(1.1);}
 </div>
 
 <script>
-// ==========================================
-// CONFIGURACIÓN DE FIREBASE (NUBE)
-// ==========================================
-const firebaseConfig = {
-  apiKey: "TU_API_KEY",
-  authDomain: "tu-proyecto.firebaseapp.com",
-  projectId: "tu-proyecto",
-  storageBucket: "tu-proyecto.appspot.com",
-  messagingSenderId: "TU_SENDER_ID",
-  appId: "TU_APP_ID"
-};
-
-firebase.initializeApp(firebaseConfig);
-const dbCloud = firebase.firestore();
-const storageCloud = firebase.storage();
-
-let categoriasCloud = [
+let categoriasCloud = JSON.parse(localStorage.getItem('tn_categorias') || JSON.stringify([
   "Halloween", "Flores", "Mariposas", "Corazones y románticos",
   "Navidad", "San Valentín", "Cáritas y expresiones", "Pestañas",
   "Animales", "Fantasía", "Dibujos animados / Disney", "Otros dibujos"
-];
+]));
 
-let plantillas = [];
-let trabajos = [];
-let trucos = [];
-let comunidad = [];
+let plantillas = JSON.parse(localStorage.getItem('tn_plantillas') || '[]');
+let trabajos = JSON.parse(localStorage.getItem('tn_trabajos') || '[]');
+let trucos = JSON.parse(localStorage.getItem('tn_trucos') || '[]');
+let comunidad = JSON.parse(localStorage.getItem('tn_comunidad') || '[]');
 let carpetaActual = null;
-
-function iniciarEscuchadoresNube() {
-  dbCloud.collection("plantillas").onSnapshot((snapshot) => {
-    plantillas = [];
-    snapshot.forEach((doc) => {
-      plantillas.push({ id: doc.id, ...doc.data() });
-    });
-    if(carpetaActual) renderPlantillasCarpeta();
-    else renderCarpetas();
-  });
-
-  dbCloud.collection("trucos").orderBy("id", "desc").onSnapshot((snapshot) => {
-    trucos = [];
-    snapshot.forEach((doc) => {
-      trucos.push({ id: doc.id, ...doc.data() });
-    });
-    renderTrucos();
-  });
-
-  dbCloud.collection("comunidad").orderBy("id", "desc").onSnapshot((snapshot) => {
-    comunidad = [];
-    snapshot.forEach((doc) => {
-      comunidad.push({ id: doc.id, ...doc.data() });
-    });
-    renderComunidad();
-  });
-}
 
 window.onload = function() {
   verificarAccesoPro();
-  iniciarEscuchadoresNube();
-  cargarTrabajosLocales();
   renderCarpetas();
 };
 
@@ -306,31 +243,30 @@ function esProActivo() {
 
 function verificarAccesoPro() {
   let estadoTxt = document.getElementById('estadoSuscripcion');
-  let panelAdmin = document.getElementById('panelAdmin');
   let adminActivo = esAdmin();
   let boxCrear = document.getElementById('boxCrearCat');
   let boxSubir = document.getElementById('boxSubirPlantilla');
   
   if(boxCrear) boxCrear.style.display = adminActivo ? 'block' : 'none';
   if(boxSubir) boxSubir.style.display = adminActivo ? 'block' : 'none';
-  if(panelAdmin) panelAdmin.style.display = adminActivo ? 'block' : 'none';
 
   if(estadoTxt) {
     if(adminActivo) {
-      estadoTxt.innerHTML = `✨ <b style="color:green;">¡Modo Jefa Activo!</b> Tienes control total de la nube.`;
+      estadoTxt.innerHTML = `✨ <b style="color:green;">¡Modo Jefa Activo!</b> Tienes control total.`;
     } else if(esProActivo()) {
-      estadoTxt.innerHTML = `✨ <b style="color:green;">¡Acceso PRO Activo!</b> Tienes acceso completo a todas las funciones.`;
+      estadoTxt.innerHTML = `✨ <b style="color:green;">¡Acceso PRO Activo!</b>`;
     } else {
-      estadoTxt.innerHTML = `Desbloquea todas las plantillas, vídeos de trucos y la comunidad por solo <b style="color:var(--primary);">9,99 € al mes</b>.`;
+      estadoTxt.innerHTML = `Desbloquea todas las plantillas y funciones por solo <b style="color:var(--primary);">9,99 € al mes</b>.`;
     }
   }
 }
 
 function validarCodigoPro() {
   let codigoIngresado = document.getElementById('inputCodigoPro').value.trim();
-  if(!codigoIngresado) return alert("Introduce un código o contraseña.");
+  if(!codigoIngresado) return alert("Introduce una contraseña o código.");
 
-  if(codigoIngresado.toUpperCase() === "JEFA" || codigoIngresado === "1234") {
+  // CONTRASEÑA SECRETA DE JEFA (Puedes cambiar 'Jefa22' por la que tú quieras aquí mismo)
+  if(codigoIngresado === "Jefa22" || codigoIngresado === "jefa22") {
     localStorage.setItem('tn_es_admin', 'true');
     localStorage.setItem('tn_pro_expira', Date.now() + 365*24*60*60*1000);
     document.getElementById('inputCodigoPro').value = '';
@@ -341,25 +277,16 @@ function validarCodigoPro() {
   }
 
   let codigoMesActual = localStorage.getItem('tn_codigo_mes_actual') || "NOVIEMBRE26";
-
   if(codigoIngresado.toUpperCase() === codigoMesActual.toUpperCase()) {
     let fechaExpiracion = Date.now() + (30 * 24 * 60 * 60 * 1000);
     localStorage.setItem('tn_pro_expira', fechaExpiracion);
     document.getElementById('inputCodigoPro').value = '';
     verificarAccesoPro();
-    alert("¡Código validado con éxito! 30 días de acceso completo desbloqueados.");
+    alert("¡Código validado con éxito!");
     cambiarPestana('plantillas');
   } else {
-    alert("Código incorrecto. Realiza tu Bizum al 620391597 y consúltalo por WhatsApp.");
+    alert("Contraseña o código incorrecto.");
   }
-}
-
-function guardarCodigoMensualAdmin() {
-  let nuevoCod = document.getElementById('inputNuevoCodigoMes').value.trim();
-  if(!nuevoCod) return alert("Escribe un código.");
-  localStorage.setItem('tn_codigo_mes_actual', nuevoCod.toUpperCase());
-  document.getElementById('inputNuevoCodigoMes').value = '';
-  alert("¡Código actualizado para las clientas: " + nuevoCod.toUpperCase() + "!");
 }
 
 function cambiarPestana(p) {
@@ -418,12 +345,13 @@ function filtrarPlantillasGlobal() {
   renderCarpetas(document.getElementById('inputBuscadorPlantillas').value);
 }
 
-function crearCategoriaNube() {
+function crearCategoriaLocal() {
   if(!esAdmin()) { alert("🔒 Solo la Jefa puede crear categorías."); return; }
   const nombre = document.getElementById('nuevaCatNombre').value.trim();
   if(!nombre) return alert("Escribe un nombre.");
   if(categoriasCloud.includes(nombre)) return alert("Ya existe.");
   categoriasCloud.push(nombre);
+  localStorage.setItem('tn_categorias', JSON.stringify(categoriasCloud));
   document.getElementById('nuevaCatNombre').value = '';
   renderCarpetas();
   alert("¡Categoría añadida!");
@@ -445,75 +373,59 @@ function volverCarpetas() {
   renderCarpetas();
 }
 
-async function procesarYGuardarPlantillaCloud() {
+function guardarPlantillaLocal() {
   if(!esAdmin()) { alert("🔒 Solo la Jefa puede subir plantillas."); return; }
   const archivo = document.getElementById('fotoPlantilla').files[0];
   if(!archivo) return alert("Selecciona una imagen.");
 
-  alert("Subiendo imagen a la nube...");
-  const storageRef = storageCloud.ref(`plantillas/${Date.now()}_${archivo.name}`);
-  const snapshot = await storageRef.put(archivo);
-  const downloadURL = await snapshot.ref.getDownloadURL();
-
-  await dbCloud.collection("plantillas").add({
-    id: Date.now().toString(),
-    cat: carpetaActual,
-    imagen: downloadURL
-  });
-
-  document.getElementById('fotoPlantilla').value = '';
-  alert("¡Plantilla subida a la nube correctamente para todas las clientas!");
+  const lector = new FileReader();
+  lector.onload = function(e) {
+    plantillas.push({
+      id: Date.now().toString(),
+      cat: carpetaActual,
+      imagen: e.target.result
+    });
+    localStorage.setItem('tn_plantillas', JSON.stringify(plantillas));
+    document.getElementById('fotoPlantilla').value = '';
+    renderPlantillasCarpeta();
+    alert("¡Plantilla guardada correctamente!");
+  };
+  lector.readAsDataURL(archivo);
 }
 
 function renderPlantillasCarpeta() {
   const grid = document.getElementById('gridPlantillas');
   let filtradas = plantillas.filter(p => p.cat === carpetaActual);
   let adminActivo = esAdmin();
-  let proActivo = esProActivo();
   
   if(filtradas.length === 0) {
-    grid.innerHTML = '<p style="grid-column:span 2;text-align:center;color:var(--text-muted);font-size:12px;">Todavía no hay imágenes en esta categoría.</p>';
+    grid.innerHTML = '<p style="grid-column:span 2;text-align:center;color:var(--text-muted);font-size:12px;">Todavía no hay imágenes en esta categoría. ¡Sube la primera!</p>';
     return;
   }
 
   let html = '';
-  filtradas.forEach((item, index) => {
-    let bloqueado = (!proActivo && index > 0);
+  filtradas.forEach((item) => {
+    let favoritosLocales = JSON.parse(localStorage.getItem('tn_favs') || '[]');
+    let esFav = favoritosLocales.includes(item.id);
+    let starClass = esFav ? 'fav-btn activo' : 'fav-btn';
+    let starSymbol = esFav ? '★' : '☆';
 
-    if(bloqueado) {
-      html += `
-        <div class="card" style="background:#faf2ff;opacity:0.9;">
-          <div class="card-img-container" onclick="cambiarPestana('pro')" style="display:flex;align-items:center;justify-content:center;flex-direction:column;background:#f3eafa;">
-            <span style="font-size:28px;">🔒</span>
-            <span style="font-size:10px;font-weight:700;color:var(--primary);margin-top:4px;text-align:center;padding:0 4px;">BLOQUEADO (SUSCRIPCIÓN PRO)</span>
-          </div>
-          <p>Diseño Pro</p>
+    html += `
+      <div class="card">
+        <button class="${starClass}" onclick="toggleFavoritoLocal(event, '${item.id}')">${starSymbol}</button>
+        <div class="card-img-container" onclick="abrirViewer('${item.imagen}')">
+          <img src="${item.imagen}">
         </div>
-      `;
-    } else {
-      let favoritosLocales = JSON.parse(localStorage.getItem('tn_favs') || '[]');
-      let esFav = favoritosLocales.includes(item.id);
-      let starClass = esFav ? 'fav-btn activo' : 'fav-btn';
-      let starSymbol = esFav ? '★' : '☆';
-
-      html += `
-        <div class="card">
-          <button class="${starClass}" onclick="toggleFavoritoLocal(event, '${item.id}')">${starSymbol}</button>
-          <div class="card-img-container" onclick="abrirViewer('${item.imagen}')">
-            <img src="${item.imagen}">
-          </div>
-          <p>Toca para calcar</p>
-          ${adminActivo ? `<button onclick="borrarPlantillaCloud('${item.id}')" style="background:#fff;color:#e74c3c;border:1px solid #e74c3c;padding:4px;font-size:10px;width:80%;margin:0 auto 6px;cursor:pointer;border-radius:6px;">🗑️ Borrar</button>` : ''}
-        </div>
-      `;
-    }
+        <p>Toca para calcar</p>
+        ${adminActivo ? `<button onclick="borrarPlantillaLocal('${item.id}')" style="background:#fff;color:#e74c3c;border:1px solid #e74c3c;padding:4px;font-size:10px;width:80%;margin:0 auto 6px;cursor:pointer;border-radius:6px;">🗑️ Borrar</button>` : ''}
+      </div>
+    `;
   });
   grid.innerHTML = html;
 }
 
 function toggleFavoritoLocal(evento, id) {
   evento.stopPropagation();
-  if(!esProActivo()) { cambiarPestana('pro'); return; }
   let favoritosLocales = JSON.parse(localStorage.getItem('tn_favs') || '[]');
   let index = favoritosLocales.indexOf(id);
   if(index > -1) {
@@ -549,17 +461,13 @@ function renderFavoritos() {
   grid.innerHTML = html;
 }
 
-async function borrarPlantillaCloud(docId) {
+function borrarPlantillaLocal(id) {
   if(!esAdmin()) { alert("🔒 Solo la Jefa puede borrar plantillas."); return; }
-  if(confirm("¿Borrar esta plantilla de la nube para todos?")) {
-    await dbCloud.collection("plantillas").doc(docId).delete();
-    alert("¡Eliminada de la nube!");
+  if(confirm("¿Borrar esta plantilla?")) {
+    plantillas = plantillas.filter(p => p.id !== id);
+    localStorage.setItem('tn_plantillas', JSON.stringify(plantillas));
+    renderPlantillasCarpeta();
   }
-}
-
-function cargarTrabajosLocales() {
-  trabajos = JSON.parse(localStorage.getItem('tn_trabajos') || '[]');
-  renderTrabajos();
 }
 
 function procesarYGuardarTrabajo() {
@@ -570,8 +478,7 @@ function procesarYGuardarTrabajo() {
 
   const lector = new FileReader();
   lector.onload = function(e) {
-    const nuevoTrabajo = { id: Date.now(), nombre: nombre || "Manicura", colores: colores || "N/A", imagen: e.target.result };
-    trabajos.push(nuevoTrabajo);
+    trabajos.push({ id: Date.now(), nombre: nombre || "Manicura", colores: colores || "N/A", imagen: e.target.result });
     localStorage.setItem('tn_trabajos', JSON.stringify(trabajos));
     document.getElementById('nombreClienta').value = '';
     document.getElementById('coloresUsados').value = '';
@@ -612,98 +519,88 @@ function borrarTrabajoLocal(id) {
   renderTrabajos();
 }
 
-async function guardarTrucoCloud() {
-  if(!esProActivo()) { cambiarPestana('pro'); return alert("🔒 Necesitas acceso PRO activo para publicar trucos."); }
+function guardarTrucoLocal() {
   const titulo = document.getElementById('inputTituloTruco').value.trim();
   const texto = document.getElementById('inputTextoTruco').value.trim();
   const archivo = document.getElementById('archivoTruco').files[0];
   if(!titulo || !texto) return alert("Rellena el título y el texto del truco.");
 
-  let mediaUrl = "";
   if(archivo) {
-    alert("Subiendo archivo multimedia a la nube...");
-    const storageRef = storageCloud.ref(`trucos/${Date.now()}_${archivo.name}`);
-    const snapshot = await storageRef.put(archivo);
-    mediaUrl = await snapshot.ref.getDownloadURL();
+    const lector = new FileReader();
+    lector.onload = function(e) {
+      trucos.push({ id: Date.now(), titulo, texto, media: e.target.result });
+      localStorage.setItem('tn_trucos', JSON.stringify(trucos));
+      document.getElementById('inputTituloTruco').value = '';
+      document.getElementById('inputTextoTruco').value = '';
+      document.getElementById('archivoTruco').value = '';
+      renderTrucos();
+      alert("¡Truco publicado!");
+    };
+    lector.readAsDataURL(archivo);
+  } else {
+    trucos.push({ id: Date.now(), titulo, texto, media: "" });
+    localStorage.setItem('tn_trucos', JSON.stringify(trucos));
+    document.getElementById('inputTituloTruco').value = '';
+    document.getElementById('inputTextoTruco').value = '';
+    renderTrucos();
+    alert("¡Truco publicado!");
   }
-
-  await dbCloud.collection("trucos").add({
-    id: Date.now(),
-    titulo,
-    texto,
-    media: mediaUrl
-  });
-
-  document.getElementById('inputTituloTruco').value = '';
-  document.getElementById('inputTextoTruco').value = '';
-  document.getElementById('archivoTruco').value = '';
-  alert("¡Truco publicado en la comunidad con éxito!");
 }
 
 function renderTrucos() {
   const contenedor = document.getElementById('listaTrucos');
   if(!contenedor) return;
   if(trucos.length === 0) {
-    contenedor.innerHTML = '<div class="box"><p style="text-align:center;color:var(--text-muted);font-size:12px;">No hay trucos aún. ¡Sé la primera en publicar!</p></div>';
+    contenedor.innerHTML = '<div class="box"><p style="text-align:center;color:var(--text-muted);font-size:12px;">No hay trucos aún.</p></div>';
     return;
   }
   let html = '';
   trucos.forEach(t => {
-    let mediaHtml = '';
-    if(t.media) {
-      if(t.media.includes("video") || t.media.endsWith(".mp4")) {
-        mediaHtml = `<video src="${t.media}" controls style="width:100%;max-height:200px;border-radius:10px;margin-top:8px;background:#000;"></video>`;
-      } else {
-        mediaHtml = `<div class="card-img-container" onclick="abrirViewer('${t.media}')" style="margin-top:8px;border-radius:10px;overflow:hidden;"><img src="${t.media}"></div>`;
-      }
-    }
-    let borrarBtn = esAdmin() ? `<button onclick="borrarTrucoCloud('${t.id}')" style="background:#fff;color:#e74c3c;border:1px solid #e74c3c;padding:3px 8px;font-size:10px;width:auto;cursor:pointer;border-radius:6px;margin-top:8px;">🗑️ Borrar</button>` : '';
+    let mediaHtml = t.media ? `<div class="card-img-container" onclick="abrirViewer('${t.media}')" style="margin-top:8px;border-radius:10px;overflow:hidden;"><img src="${t.media}"></div>` : '';
     html += `
       <div class="box">
         <h4 style="margin:0 0 4px 0;color:var(--primary-dark);font-size:14px;">💡 ${t.titulo}</h4>
         <p style="margin:0 0 8px 0;font-size:12px;color:var(--text-main);white-space:pre-wrap;">${t.texto}</p>
         ${mediaHtml}
-        ${borrarBtn}
+        <button onclick="borrarTruco(${t.id})" style="background:#fff;color:#e74c3c;border:1px solid #e74c3c;padding:3px 8px;font-size:10px;width:auto;cursor:pointer;border-radius:6px;margin-top:8px;">🗑️ Borrar</button>
       </div>
     `;
   });
   contenedor.innerHTML = html;
 }
 
-async function borrarTrucoCloud(docId) {
-  if(!esAdmin()) { alert("🔒 Solo la Jefa puede borrar trucos."); return; }
-  if(confirm("¿Borrar truco?")) {
-    await dbCloud.collection("trucos").doc(docId).delete();
-  }
+function borrarTruco(id) {
+  trucos = trucos.filter(t => t.id !== id);
+  localStorage.setItem('tn_trucos', JSON.stringify(trucos));
+  renderTrucos();
 }
 
-async function publicarComunidadCloud() {
-  if(!esProActivo()) { cambiarPestana('pro'); return alert("🔒 Necesitas acceso PRO activo para publicar en la comunidad."); }
+function publicarComunidadLocal() {
   const autor = document.getElementById('autorComunidad').value.trim();
   const texto = document.getElementById('textoComunidad').value.trim();
   const archivo = document.getElementById('fotoComunidad').files[0];
-
   if(!autor || !texto) return alert("Rellena tu nombre y el texto.");
 
-  let imgUrl = "";
   if(archivo) {
-    alert("Subiendo imagen a la comunidad...");
-    const storageRef = storageCloud.ref(`comunidad/${Date.now()}_${archivo.name}`);
-    const snapshot = await storageRef.put(archivo);
-    imgUrl = await snapshot.ref.getDownloadURL();
+    const lector = new FileReader();
+    lector.onload = function(e) {
+      comunidad.push({ id: Date.now(), autor, texto, imagen: e.target.result });
+      localStorage.setItem('tn_comunidad', JSON.stringify(comunidad));
+      document.getElementById('autorComunidad').value = '';
+      document.getElementById('textoComunidad').value = '';
+      document.getElementById('fotoComunidad').value = '';
+      renderComunidad();
+      alert("¡Publicado en la comunidad!");
+    };
+    lector.readAsDataURL(archivo);
+  } else {
+    comunidad.push({ id: Date.now(), autor, texto, imagen: "" });
+    localStorage.setItem('tn_comunidad', JSON.stringify(comunidad));
+    document.getElementById('autorComunidad').value = '';
+    document.getElementById('textoComunidad').value = '';
+    renderComunidad();
+    alert("¡Publicado en la comunidad!");
   }
-
-  await dbCloud.collection("comunidad").add({
-    id: Date.now(),
-    autor,
-    texto,
-    imagen: imgUrl
-  });
-
-  document.getElementById('autorComunidad').value = '';
-  document.getElementById('textoComunidad').value = '';
-  document.getElementById('fotoComunidad').value = '';
-  alert("¡Publicado en la comunidad global!");
 }
 
 function renderComunidad() {
@@ -716,31 +613,29 @@ function renderComunidad() {
   let html = '';
   comunidad.forEach(p => {
     let imagenHtml = p.imagen ? `<div class="card-img-container" onclick="abrirViewer('${p.imagen}')" style="margin-top:8px;border-radius:10px;overflow:hidden;"><img src="${p.imagen}"></div>` : '';
-    let borrarBtn = esAdmin() ? `<button onclick="borrarComunidadCloud('${p.id}')" style="background:#fff;color:#e74c3c;border:1px solid #e74c3c;padding:3px 8px;font-size:10px;width:auto;cursor:pointer;border-radius:6px;margin-top:8px;">🗑️ Borrar</button>` : '';
     html += `
       <div class="box">
         <b style="color:var(--primary-dark);font-size:13px;">💬 ${p.autor}</b>
         <p style="margin:4px 0;font-size:12px;color:var(--text-main);white-space:pre-wrap;">${p.texto}</p>
         ${imagenHtml}
-        ${borrarBtn}
+        <button onclick="borrarComunidad(${p.id})" style="background:#fff;color:#e74c3c;border:1px solid #e74c3c;padding:3px 8px;font-size:10px;width:auto;cursor:pointer;border-radius:6px;margin-top:8px;">🗑️ Borrar</button>
       </div>
     `;
   });
   contenedor.innerHTML = html;
 }
 
-async function borrarComunidadCloud(docId) {
-  if(!esAdmin()) { alert("🔒 Solo la Jefa puede borrar mensajes."); return; }
-  if(confirm("¿Borrar mensaje?")) {
-    await dbCloud.collection("comunidad").doc(docId).delete();
-  }
+function borrarComunidad(id) {
+  comunidad = comunidad.filter(p => p.id !== id);
+  localStorage.setItem('tn_comunidad', JSON.stringify(comunidad));
+  renderComunidad();
 }
 
 const viewer = document.getElementById('viewer');
 const imgGrande = document.getElementById('imgGrande');
 const zoomRange = document.getElementById('zoomRange');
 let bloqueado = false;
-let escala = 1, posX = 0, posY = 0;
+let escala = 1, posX = 0, posY =0;
 let startX = 0, startY = 0, dragging = false;
 
 function abrirViewer(src) {
