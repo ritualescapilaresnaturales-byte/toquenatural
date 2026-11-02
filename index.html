@@ -143,4 +143,53 @@ button.action-btn:hover{filter: brightness(1.1);}
     <div class="box" style="margin-top:16px;background:linear-gradient(135deg, #fff 0%, #f9f2ff 100%);border:1px dashed var(--primary);">
       <b>🌐 Buscar inspiración en internet</b>
       <p style="font-size:11px;color:var(--text-muted);margin:2px 0 8px;">Escribe lo que buscas y elige dónde buscar:</p>
-      <input type="text" id
+      <input type="text" id="busquedaWebInput" placeholder="Ej. Uñas flores, minimalista...">
+      <div class="web-search-box">
+        <button class="action-btn" style="background:#bd081c;" onclick="buscarEnPinterest()">Pinterest</button>
+        <button class="action-btn" style="background:#4285F4;" onclick="buscarEnGoogle()">Google Imágenes</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="vistaDetalleCarpeta" style="display:none;">
+    <button class="action-btn" style="width:auto;padding:8px 14px;margin-bottom:12px;background:#e2d1f9;color:var(--primary-dark);" onclick="volverCarpetas()">⬅️ Volver a Categorías</button>
+    <h3 id="tituloCarpetaActual" style="margin:5px 0 12px;font-size:16px;color:var(--primary-dark);"></h3>
+    
+    <div class="box" id="boxSubirPlantilla" style="display:none;">
+      <b>🗂️ Subir Plantilla a la Nube (Solo Jefa)</b>
+      <input type="file" id="fotoPlantilla" accept="image/*">
+      <button class="action-btn" onclick="subirPlantillaFirebase()">Subir a la Nube</button>
+    </div>
+
+    <div class="grid" id="gridPlantillas"></div>
+  </div>
+</div>
+
+<div id="secFavoritos" style="display:none;">
+  <div class="box">
+    <b>⭐ Tus Plantillas Favoritas</b>
+  </div>
+  <div class="grid" id="gridFavoritos"></div>
+</div>
+
+<div id="secTrabajos" style="display:none;">
+  <div class="box">
+    <b>🔍 Buscar trabajo guardado</b>
+    <input type="text" id="inputBuscadorTrabajos" placeholder="Busca por cliente o esmalte..." oninput="renderTrabajos()">
+  </div>
+  <div class="box">
+    <b>📸 Registrador de trabajo realizado</b>
+    <input type="text" id="nombreClienta" placeholder="Nombre de la cliente/diseño">
+    <input type="text" id="coloresUsados" placeholder="Esmaltes usados">
+    <input type="file" id="fotoTrabajo" accept="image/*">
+    <button class="action-btn" onclick="procesarYGuardarTrabajo()">Guardar Trabajo</button>
+  </div>
+  <div class="grid" id="gridTrabajos"></div>
+</div>
+
+<div id="secTrucos" style="display:none;">
+  <div class="box">
+    <b>💡 Rincón de Trucos y Vídeos</b>
+    <p style="font-size:11px;color:var(--text-muted);margin:3px 0 8px;">Comparte fotos o vídeos cortos explicando técnicas.</p>
+    <input type="text" id="inputTituloTruco" placeholder="Título (Ej: Cómo aplicar el gel sin burbujas)">
+    <textarea id="
