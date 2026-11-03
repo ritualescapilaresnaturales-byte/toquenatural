@@ -109,10 +109,10 @@ button.action-btn:hover{filter: brightness(1.1);}
       <button class="action-btn" onclick="crearCategoriaLocal()">Crear Categoría</button>
     </div>
 
-    <!-- BOTÓN DE EMERGENCIA PARA LIBERAR MEMORIA SI SE BLOQUEA -->
+    <!-- ZONA OCULTA: Solo aparece si eres Jefa -->
     <div class="box" id="boxResetTotal" style="display:none;background:#fff5f5;border:1px solid #feb2b2;">
       <b style="color:#c53030;">⚠️ Zona de Jefa: Limpieza de Emergencia</b>
-      <p style="font-size:11px;color:#742a2a;margin:4px 0 8px;">Si alguna vez notas que una imagen no se borra o la memoria se satura, pulsa aquí para vaciar el espacio dañado:</p>
+      <p style="font-size:11px;color:#742a2a;margin:4px 0 8px;">Si se satura la memoria, pulsa aquí para vaciar el espacio:</p>
       <button onclick="limpiarMemoriaForzosa()" style="background:#e53e3e;color:#fff;border:none;padding:8px;border-radius:8px;font-weight:bold;cursor:pointer;width:100%;">🗑️ Borrar caché y vaciar galería</button>
     </div>
 
@@ -166,28 +166,44 @@ button.action-btn:hover{filter: brightness(1.1);}
   <div class="grid" id="gridTrabajos"></div>
 </div>
 
+<!-- SECCIÓN TRUCOS (BLOQUEADA PARA NO PROS) -->
 <div id="secTrucos" style="display:none;">
-  <div class="box">
-    <b>💡 Rincón de Trucos y Técnicas</b>
-    <p style="font-size:11px;color:var(--text-muted);margin:3px 0 8px;">Comparte fotos y explica tus trucos.</p>
-    <input type="text" id="inputTituloTruco" placeholder="Título (Ej: Efecto blooming con capa fina)">
-    <textarea id="inputTextoTruco" rows="3" placeholder="Explica el truco detalladamente..."></textarea>
-    <input type="file" id="archivoTruco" accept="image/*,video/*">
-    <button class="action-btn" onclick="guardarTrucoLocal()">Publicar Truco</button>
+  <div id="contenidoTrucosPro">
+    <div class="box">
+      <b>💡 Rincón de Trucos y Técnicas (Exclusivo PRO)</b>
+      <p style="font-size:11px;color:var(--text-muted);margin:3px 0 8px;">Comparte fotos y explica tus trucos profesionales.</p>
+      <input type="text" id="inputTituloTruco" placeholder="Título (Ej: Efecto blooming con capa fina)">
+      <textarea id="inputTextoTruco" rows="3" placeholder="Explica el truco detalladamente..."></textarea>
+      <input type="file" id="archivoTruco" accept="image/*,video/*">
+      <button class="action-btn" onclick="guardarTrucoLocal()">Publicar Truco</button>
+    </div>
+    <div id="listaTrucos"></div>
   </div>
-  <div id="listaTrucos"></div>
+  <div id="avisoTrucosBloqueado" style="display:none;" class="box" style="text-align:center;">
+    <h3 style="color:var(--primary);">🔒 Contenido Exclusivo PRO</h3>
+    <p style="font-size:13px;color:var(--text-muted);">El rincón de trucos y técnicas solo está disponible para cuentas PRO y suscritas.</p>
+    <button class="action-btn" onclick="cambiarPestana('pro')">✨ Activar acceso PRO</button>
+  </div>
 </div>
 
+<!-- SECCIÓN COMUNIDAD (BLOQUEADA PARA NO PROS) -->
 <div id="secComunidad" style="display:none;">
-  <div class="box">
-    <b>💬 Comunidad Exclusiva Toque Natural</b>
-    <p style="font-size:11px;color:var(--text-muted);margin:3px 0 8px;">Comparte tus diseños y comenta con otros profesionales.</p>
-    <input type="text" id="autorComunidad" placeholder="Tu nombre / Salón">
-    <textarea id="textoComunidad" rows="3" placeholder="Escribe tu mensaje..."></textarea>
-    <input type="file" id="fotoComunidad" accept="image/*">
-    <button class="action-btn" onclick="publicarComunidadLocal()">Publicar en Comunidad</button>
+  <div id="contenidoComunidadPro">
+    <div class="box">
+      <b>💬 Comunidad Exclusiva Toque Natural (Exclusivo PRO)</b>
+      <p style="font-size:11px;color:var(--text-muted);margin:3px 0 8px;">Comparte tus diseños y comenta con otros profesionales.</p>
+      <input type="text" id="autorComunidad" placeholder="Tu nombre / Salón">
+      <textarea id="textoComunidad" rows="3" placeholder="Escribe tu mensaje..."></textarea>
+      <input type="file" id="fotoComunidad" accept="image/*">
+      <button class="action-btn" onclick="publicarComunidadLocal()">Publicar en Comunidad</button>
+    </div>
+    <div id="listaComunidad"></div>
   </div>
-  <div id="listaComunidad"></div>
+  <div id="avisoComunidadBloqueado" style="display:none;" class="box" style="text-align:center;">
+    <h3 style="color:var(--primary);">🔒 Comunidad Exclusiva PRO</h3>
+    <p style="font-size:13px;color:var(--text-muted);">El chat de la comunidad es un espacio reservado para profesionales suscritos.</p>
+    <button class="action-btn" onclick="cambiarPestana('pro')">✨ Activar acceso PRO</button>
+  </div>
 </div>
 
 <div id="secPro" style="display:none;">
@@ -254,6 +270,8 @@ function esProActivo() {
 function verificarAccesoPro() {
   let estadoTxt = document.getElementById('estadoSuscripcion');
   let adminActivo = esAdmin();
+  let proActivo = esProActivo();
+  
   let boxCrear = document.getElementById('boxCrearCat');
   let boxSubir = document.getElementById('boxSubirPlantilla');
   let boxReset = document.getElementById('boxResetTotal');
@@ -262,13 +280,31 @@ function verificarAccesoPro() {
   if(boxSubir) boxSubir.style.display = adminActivo ? 'block' : 'none';
   if(boxReset) boxReset.style.display = adminActivo ? 'block' : 'none';
 
+  // Bloquear o desbloquear Trucos y Comunidad según si es PRO o Jefa
+  let contenidoTrucos = document.getElementById('contenidoTrucosPro');
+  let avisoTrucos = document.getElementById('avisoTrucosBloqueado');
+  let contenidoComunidad = document.getElementById('contenidoComunidadPro');
+  let avisoComunidad = document.getElementById('avisoComunidadBloqueado');
+
+  if(proActivo) {
+    if(contenidoTrucos) contenidoTrucos.style.display = 'block';
+    if(avisoTrucos) avisoTrucos.style.display = 'none';
+    if(contenidoComunidad) contenidoComunidad.style.display = 'block';
+    if(avisoComunidad) avisoComunidad.style.display = 'none';
+  } else {
+    if(contenidoTrucos) contenidoTrucos.style.display = 'none';
+    if(avisoTrucos) avisoTrucos.style.display = 'block';
+    if(contenidoComunidad) contenidoComunidad.style.display = 'none';
+    if(avisoComunidad) avisoComunidad.style.display = 'block';
+  }
+
   if(estadoTxt) {
     if(adminActivo) {
       estadoTxt.innerHTML = `✨ <b style="color:green;">¡Modo Jefa Activo!</b> Tienes control total.`;
-    } else if(esProActivo()) {
-      estadoTxt.innerHTML = `✨ <b style="color:green;">¡Acceso PRO Activo!</b>`;
+    } else if(proActivo) {
+      estadoTxt.innerHTML = `✨ <b style="color:green;">¡Acceso PRO Activo!</b> Disfruta de la comunidad y trucos.`;
     } else {
-      estadoTxt.innerHTML = `Desbloquea todas las plantillas y funciones por solo <b style="color:var(--primary);">9,99 € al mes</b>.`;
+      estadoTxt.innerHTML = `Desbloquea todas las plantillas, trucos y la comunidad por solo <b style="color:var(--primary);">9,99 € al mes</b>.`;
     }
   }
 }
@@ -295,7 +331,7 @@ function validarCodigoPro() {
     localStorage.setItem('tn_pro_expira', fechaExpiracion);
     inputElem.value = '';
     verificarAccesoPro();
-    alert("¡Código validado con éxito!");
+    alert("¡Código PRO validado con éxito!");
     cambiarPestana('plantillas');
   } else {
     alert("Contraseña o código incorrecto.");
@@ -393,18 +429,16 @@ function volverCarpetas() {
   renderCarpetas();
 }
 
-// BOTÓN DE LIMPIEZA TOTAL PARA EVITAR QUE SE QUEDE ATASCADO
 function limpiarMemoriaForzosa() {
   if(confirm("¿Seguro que quieres vaciar la memoria y limpiar las imágenes atascadas?")) {
     localStorage.removeItem('tn_plantillas');
     plantillas = [];
     renderCarpetas();
     if(carpetaActual) renderPlantillasCarpeta();
-    alert("¡Memoria limpiada con éxito! Ya puedes subir tus fotos limpias.");
+    alert("¡Memoria limpiada con éxito!");
   }
 }
 
-// COMPRESOR SÚPER LIGERO PARA LÁMINAS
 function comprimirImagenSegura(file, callback) {
   const reader = new FileReader();
   reader.onload = function(e) {
@@ -413,8 +447,7 @@ function comprimirImagenSegura(file, callback) {
       const canvas = document.createElement('canvas');
       let width = img.width;
       let height = img.height;
-      
-      const maxDim = 900; // Tamaño optimizado para que no ocupe espacio innecesario
+      const maxDim = 900;
       if (width > height && width > maxDim) {
         height *= maxDim / width;
         width = maxDim;
@@ -422,12 +455,10 @@ function comprimirImagenSegura(file, callback) {
         width *= maxDim / height;
         height = maxDim;
       }
-
       canvas.width = width;
       canvas.height = height;
       const ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0, width, height);
-      
       const dataUrl = canvas.toDataURL('image/jpeg', 0.75);
       callback(dataUrl);
     };
@@ -451,7 +482,7 @@ function subirPlantillaLocal() {
       renderPlantillasCarpeta();
       alert("¡Lámina subida con éxito!");
     } catch(err) {
-      alert("Memoria llena. Entra arriba en 'Limpieza de Emergencia' para vaciar espacio.");
+      alert("Memoria llena. Usa el botón de limpieza de emergencia.");
     }
   });
 }
@@ -585,6 +616,7 @@ function borrarTrabajoLocal(id) {
 }
 
 function guardarTrucoLocal() {
+  if(!esProActivo()) { alert("🔒 Contenido exclusivo para usuarios PRO."); return; }
   const titulo = document.getElementById('inputTituloTruco').value.trim();
   const texto = document.getElementById('inputTextoTruco').value.trim();
   const archivoInput = document.getElementById('archivoTruco');
@@ -626,7 +658,7 @@ function renderTrucos() {
         <h4 style="margin:0 0 4px 0;color:var(--primary-dark);font-size:14px;">💡 ${t.titulo}</h4>
         <p style="margin:0 0 8px 0;font-size:12px;color:var(--text-main);white-space:pre-wrap;">${t.texto}</p>
         ${mediaHtml}
-        <button onclick="borrarTruco(${t.id})" style="background:#fff;color:#e74c3c;border:1px solid #e74c3c;padding:3px 8px;font-size:10px;width:auto;cursor:pointer;border-radius:6px;margin-top:8px;">🗑️ Borrar</button>
+        ${esAdmin() ? `<button onclick="borrarTruco(${t.id})" style="background:#fff;color:#e74c3c;border:1px solid #e74c3c;padding:3px 8px;font-size:10px;width:auto;cursor:pointer;border-radius:6px;margin-top:8px;">🗑️ Borrar</button>` : ''}
       </div>
     `;
   });
@@ -640,6 +672,7 @@ function borrarTruco(id) {
 }
 
 function publicarComunidadLocal() {
+  if(!esProActivo()) { alert("🔒 Contenido exclusivo para usuarios PRO."); return; }
   const autor = document.getElementById('autorComunidad').value.trim();
   const texto = document.getElementById('textoComunidad').value.trim();
   const archivoInput = document.getElementById('fotoComunidad');
@@ -681,7 +714,7 @@ function renderComunidad() {
         <b style="color:var(--primary-dark);font-size:13px;">💬 ${p.autor}</b>
         <p style="margin:4px 0;font-size:12px;color:var(--text-main);white-space:pre-wrap;">${p.texto}</p>
         ${imagenHtml}
-        <button onclick="borrarComunidad(${p.id})" style="background:#fff;color:#e74c3c;border:1px solid #e74c3c;padding:3px 8px;font-size:10px;width:auto;cursor:pointer;border-radius:6px;margin-top:8px;">🗑️ Borrar</button>
+        ${esAdmin() ? `<button onclick="borrarComunidad(${p.id})" style="background:#fff;color:#e74c3c;border:1px solid #e74c3c;padding:3px 8px;font-size:10px;width:auto;cursor:pointer;border-radius:6px;margin-top:8px;">🗑️ Borrar</button>` : ''}
       </div>
     `;
   });
