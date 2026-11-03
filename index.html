@@ -160,7 +160,7 @@ button.action-btn:hover{filter: brightness(1.1);}
     <div class="box" id="boxSubirPlantilla" style="display:none;">
       <b>🗂️ Subir Plantilla (Solo Jefa)</b>
       <input type="file" id="fotoPlantilla" accept="image/*">
-      <button class="action-btn" onclick="subirPlantillaNube()">Subir Plantilla a la Nube</button>
+      <button class="action-btn" onclick="subirPlantillaOptimizadaNube()">Subir Lámina a la Nube</button>
     </div>
 
     <div class="grid" id="gridPlantillas"></div>
@@ -179,4 +179,177 @@ button.action-btn:hover{filter: brightness(1.1);}
     <b>🔍 Buscar trabajo guardado</b>
     <input type="text" id="inputBuscadorTrabajos" placeholder="Busca por cliente o esmalte..." oninput="renderTrabajos()">
   </div>
-  <div class
+  <div class="box">
+    <b>📸 Registrador de trabajo realizado</b>
+    <input type="text" id="nombreClienta" placeholder="Nombre de la cliente/diseño">
+    <input type="text" id="coloresUsados" placeholder="Esmaltes usados">
+    <input type="file" id="fotoTrabajo" accept="image/*">
+    <button class="action-btn" onclick="procesarYGuardarTrabajo()">Guardar Trabajo</button>
+  </div>
+  <div class="grid" id="gridTrabajos"></div>
+</div>
+
+<div id="secTrucos" style="display:none;">
+  <div class="box">
+    <b>💡 Rincón de Trucos y Técnicas (Nube Global)</b>
+    <p style="font-size:11px;color:var(--text-muted);margin:3px 0 8px;">Comparte fotos y explica tus trucos para que los vea todo el mundo.</p>
+    <input type="text" id="autorTruco" placeholder="Tu nombre / Salón">
+    <input type="text" id="inputTituloTruco" placeholder="Título (Ej: Efecto blooming con capa fina)">
+    <textarea id="inputTextoTruco" rows="3" placeholder="Explica el truco detalladamente..."></textarea>
+    <input type="file" id="archivoTruco" accept="image/*,video/*">
+    <button class="action-btn" onclick="publicarTrucoNube()">Publicar Truco en la Nube</button>
+  </div>
+  <div id="listaTrucos"></div>
+</div>
+
+<div id="secComunidad" style="display:none;">
+  <div class="box">
+    <b>💬 Chat de la Comunidad Global</b>
+    <p style="font-size:11px;color:var(--text-muted);margin:3px 0 8px;">Pregunta dudas y comenta en directo con profesionales de todo el mundo.</p>
+    <input type="text" id="autorComunidad" placeholder="Tu nombre / Salón">
+    <textarea id="textoComunidad" rows="3" placeholder="Escribe tu mensaje..."></textarea>
+    <input type="file" id="fotoComunidad" accept="image/*">
+    <button class="action-btn" onclick="publicarComunidadNube()">Enviar al Chat Global</button>
+  </div>
+  <div id="listaComunidad"></div>
+</div>
+
+<div id="secPro" style="display:none;">
+  <div class="box" style="text-align:center;border:2px solid var(--primary);background:linear-gradient(180deg, #fff 0%, #faf4ff 100%);">
+    <h3 style="color:var(--primary);margin-top:0;">✨ Toque Natural · Suscripción PRO</h3>
+    <p id="estadoSuscripcion" style="font-size:13px;color:var(--text-muted);line-height:1.4;">
+      Desbloquea todas las plantillas ilimitadas, el visor de calco y los contenidos por solo <b style="color:var(--primary);">9,99 € al mes</b>.
+    </p>
+
+    <div style="background:#fff;padding:14px;border-radius:14px;border:1px solid var(--border-color);margin:14px 0;text-align:left;box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+      <b>📱 Introduce tu contraseña de Jefa o código mensual</b>
+      <input type="text" id="inputCodigoPro" placeholder="Introduce tu clave secreta..." style="margin-top:10px;">
+      <button class="action-btn" style="margin-top:8px;" onclick="validarCodigoPro()">Activar Acceso</button>
+    </div>
+
+    <button class="action-btn" style="background: #25d366; box-shadow: 0 4px 15px rgba(37,211,102,0.3); margin-top:10px;" onclick="window.open('https://wa.me/34620391597?text=Hola,%20quiero%20mi%20código%20mensual%20PRO%20de%20Toque%20Natural%20por%209,99€','_blank')">💬 Pedir código por WhatsApp</button>
+  </div>
+</div>
+
+<div id="viewer">
+  <div class="vtop">
+    <button class="close" onclick="cerrarViewer()">✕ Cerrar</button>
+    <button id="lockBtn" onclick="toggleLock()">🔒 BLOQUEAR</button>
+  </div>
+  <div class="vstage" id="vstage"><img id="imgGrande" alt="Ampliada"></div>
+  <div class="vbottom" id="controls">
+    Zoom: <input type="range" id="zoomRange" min="50" max="300" value="100" style="width:100%;accent-color:#9b51e0">
+  </div>
+</div>
+
+<script>
+let categoriasCloud = [
+  "Halloween", "Flores", "Mariposas", "Corazones y románticos",
+  "Navidad", "San Valentín", "Cáritas y expresiones", "Pestañas",
+  "Animales", "Fantasía", "Dibujos animados / Disney", "Otros dibujos"
+];
+
+let savedCats = JSON.parse(localStorage.getItem('tn_categorias') || '[]');
+savedCats.forEach(c => {
+  if(!categoriasCloud.includes(c)) categoriasCloud.push(c);
+});
+
+let plantillas = [];
+let trabajos = JSON.parse(localStorage.getItem('tn_trabajos') || '[]');
+let trucosNube = [];
+let comunidadNube = [];
+let carpetaActual = null;
+
+window.addEventListener('firebaseListo', async () => {
+  await cargarTodoFirebase();
+  verificarAccesoPro();
+  renderCarpetas();
+});
+
+async function cargarTodoFirebase() {
+  try {
+    const snapP = await window.getDocs(window.colPlantillas);
+    plantillas = [];
+    snapP.forEach(docSnap => plantillas.push({ id: docSnap.id, ...docSnap.data() }));
+
+    const snapC = await window.getDocs(window.colComunidad);
+    comunidadNube = [];
+    snapC.forEach(docSnap => comunidadNube.push({ id: docSnap.id, ...docSnap.data() }));
+    comunidadNube.sort((a,b) => b.creado - a.creado);
+
+    const snapT = await window.getDocs(window.colTrucos);
+    trucosNube = [];
+    snapT.forEach(docSnap => trucosNube.push({ id: docSnap.id, ...docSnap.data() }));
+    trucosNube.sort((a,b) => b.creado - a.creado);
+
+    if(carpetaActual) renderPlantillasCarpeta();
+    renderCarpetas();
+    if(document.getElementById('secComunidad').style.display === 'block') renderComunidad();
+    if(document.getElementById('secTrucos').style.display === 'block') renderTrucos();
+  } catch(e) {
+    console.error("Error cargando de la nube:", e);
+  }
+}
+
+function esAdmin() {
+  return localStorage.getItem('tn_es_admin') === 'true';
+}
+
+function esProActivo() {
+  let expira = localStorage.getItem('tn_pro_expira');
+  let ahora = Date.now();
+  return esAdmin() || (expira && ahora < parseInt(expira));
+}
+
+function verificarAccesoPro() {
+  let estadoTxt = document.getElementById('estadoSuscripcion');
+  let adminActivo = esAdmin();
+  let boxCrear = document.getElementById('boxCrearCat');
+  let boxSubir = document.getElementById('boxSubirPlantilla');
+  
+  if(boxCrear) boxCrear.style.display = adminActivo ? 'block' : 'none';
+  if(boxSubir) boxSubir.style.display = adminActivo ? 'block' : 'none';
+
+  if(estadoTxt) {
+    if(adminActivo) {
+      estadoTxt.innerHTML = `✨ <b style="color:green;">¡Modo Jefa Activo!</b> Tienes control total.`;
+    } else if(esProActivo()) {
+      estadoTxt.innerHTML = `✨ <b style="color:green;">¡Acceso PRO Activo!</b>`;
+    } else {
+      estadoTxt.innerHTML = `Desbloquea todas las plantillas y funciones por solo <b style="color:var(--primary);">9,99 € al mes</b>.`;
+    }
+  }
+}
+
+function validarCodigoPro() {
+  let inputElem = document.getElementById('inputCodigoPro');
+  if(!inputElem) return;
+  let codigoIngresado = inputElem.value.trim();
+  if(!codigoIngresado) return alert("Introduce una contraseña o código.");
+
+  if(codigoIngresado === "Jefa22" || codigoIngresado === "jefa22") {
+    localStorage.setItem('tn_es_admin', 'true');
+    localStorage.setItem('tn_pro_expira', Date.now() + 365*24*60*60*1000);
+    inputElem.value = '';
+    verificarAccesoPro();
+    alert("¡Hola Jefa! Modo administración activado con éxito.");
+    cambiarPestana('plantillas');
+    return;
+  }
+
+  let codigoMesActual = localStorage.getItem('tn_codigo_mes_actual') || "NOVIEMBRE26";
+  if(codigoIngresado.toUpperCase() === codigoMesActual.toUpperCase()) {
+    let fechaExpiracion = Date.now() + (30 * 24 * 60 * 60 * 1000);
+    localStorage.setItem('tn_pro_expira', fechaExpiracion);
+    inputElem.value = '';
+    verificarAccesoPro();
+    alert("¡Código validado con éxito!");
+    cambiarPestana('plantillas');
+  } else {
+    alert("Contraseña o código incorrecto.");
+  }
+}
+
+function cambiarPestana(p) {
+  ['secPlantillas','secFavoritos','secTrabajos','secTrucos','secComunidad','secPro'].forEach(id => {
+    let sec = document.
