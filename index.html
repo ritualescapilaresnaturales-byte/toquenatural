@@ -5,36 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>Toque Natural · Nail Art PRO</title>
 
-<!-- Importar Firebase SDKs (Cloud Firestore para Nube Global Definitiva) -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyA9tMOYwvXMVNC1fe0UQG2Zs3GE2-sVPNA",
-    authDomain: "toque-natural-2407b.firebaseapp.com",
-    projectId: "toque-natural-2407b",
-    storageBucket: "toque-natural-2407b.firebasestorage.app",
-    messagingSenderId: "860008728334",
-    appId: "1:860008728334:web:42a40c50281c8f79eb795f",
-    measurementId: "G-WX2J6RJF7T"
-  };
-
-  try {
-    const app = initializeApp(firebaseConfig);
-    window.fbDb = getFirestore(app);
-    window.colPlantillas = collection(window.fbDb, "plantillas_nailart");
-    window.colComunidad = collection(window.fbDb, "comunidad_chat");
-    window.colTrucos = collection(window.fbDb, "trucos_tecnicas");
-  } catch(err) {
-    console.error("Error Firebase:", err);
-  }
-
-  window.addEventListener('DOMContentLoaded', () => {
-    window.dispatchEvent(new Event('firebaseListo'));
-  });
-</script>
-
 <style>
 :root {
   --bg-gradient: linear-gradient(135deg, #fdfbfd 0%, #f4eef8 100%);
@@ -160,7 +130,7 @@ button.action-btn:hover{filter: brightness(1.1);}
     <div class="box" id="boxSubirPlantilla" style="display:none;">
       <b>🗂️ Subir Plantilla (Solo Jefa)</b>
       <input type="file" id="fotoPlantilla" accept="image/*">
-      <button class="action-btn" onclick="subirPlantillaOptimizadaNube()">Subir Lámina a la Nube</button>
+      <button class="action-btn" onclick="subirPlantillaSegura()">Subir Lámina</button>
     </div>
 
     <div class="grid" id="gridPlantillas"></div>
@@ -191,25 +161,24 @@ button.action-btn:hover{filter: brightness(1.1);}
 
 <div id="secTrucos" style="display:none;">
   <div class="box">
-    <b>💡 Rincón de Trucos y Técnicas (Nube Global)</b>
-    <p style="font-size:11px;color:var(--text-muted);margin:3px 0 8px;">Comparte fotos y explica tus trucos para que los vea todo el mundo.</p>
-    <input type="text" id="autorTruco" placeholder="Tu nombre / Salón">
+    <b>💡 Rincón de Trucos y Técnicas</b>
+    <p style="font-size:11px;color:var(--text-muted);margin:3px 0 8px;">Comparte fotos y explica tus trucos.</p>
     <input type="text" id="inputTituloTruco" placeholder="Título (Ej: Efecto blooming con capa fina)">
     <textarea id="inputTextoTruco" rows="3" placeholder="Explica el truco detalladamente..."></textarea>
     <input type="file" id="archivoTruco" accept="image/*,video/*">
-    <button class="action-btn" onclick="publicarTrucoNube()">Publicar Truco en la Nube</button>
+    <button class="action-btn" onclick="guardarTrucoSeguro()">Publicar Truco</button>
   </div>
   <div id="listaTrucos"></div>
 </div>
 
 <div id="secComunidad" style="display:none;">
   <div class="box">
-    <b>💬 Chat de la Comunidad Global</b>
-    <p style="font-size:11px;color:var(--text-muted);margin:3px 0 8px;">Pregunta dudas y comenta en directo con profesionales de todo el mundo.</p>
+    <b>💬 Comunidad Exclusiva Toque Natural</b>
+    <p style="font-size:11px;color:var(--text-muted);margin:3px 0 8px;">Comparte tus diseños y comenta con otros profesionales.</p>
     <input type="text" id="autorComunidad" placeholder="Tu nombre / Salón">
     <textarea id="textoComunidad" rows="3" placeholder="Escribe tu mensaje..."></textarea>
     <input type="file" id="fotoComunidad" accept="image/*">
-    <button class="action-btn" onclick="publicarComunidadNube()">Enviar al Chat Global</button>
+    <button class="action-btn" onclick="publicarComunidadSegura()">Publicar en Comunidad</button>
   </div>
   <div id="listaComunidad"></div>
 </div>
@@ -243,53 +212,22 @@ button.action-btn:hover{filter: brightness(1.1);}
 </div>
 
 <script>
-let categoriasCloud = [
+let categoriasCloud = JSON.parse(localStorage.getItem('tn_categorias') || JSON.stringify([
   "Halloween", "Flores", "Mariposas", "Corazones y románticos",
   "Navidad", "San Valentín", "Cáritas y expresiones", "Pestañas",
   "Animales", "Fantasía", "Dibujos animados / Disney", "Otros dibujos"
-];
+]));
 
-let savedCats = JSON.parse(localStorage.getItem('tn_categorias') || '[]');
-savedCats.forEach(c => {
-  if(!categoriasCloud.includes(c)) categoriasCloud.push(c);
-});
-
-let plantillas = [];
+let plantillas = JSON.parse(localStorage.getItem('tn_plantillas') || '[]');
 let trabajos = JSON.parse(localStorage.getItem('tn_trabajos') || '[]');
-let trucosNube = [];
-let comunidadNube = [];
+let trucos = JSON.parse(localStorage.getItem('tn_trucos') || '[]');
+let comunidad = JSON.parse(localStorage.getItem('tn_comunidad') || '[]');
 let carpetaActual = null;
 
-window.addEventListener('firebaseListo', async () => {
-  await cargarTodoFirebase();
+window.addEventListener('DOMContentLoaded', () => {
   verificarAccesoPro();
   renderCarpetas();
 });
-
-async function cargarTodoFirebase() {
-  try {
-    const snapP = await window.getDocs(window.colPlantillas);
-    plantillas = [];
-    snapP.forEach(docSnap => plantillas.push({ id: docSnap.id, ...docSnap.data() }));
-
-    const snapC = await window.getDocs(window.colComunidad);
-    comunidadNube = [];
-    snapC.forEach(docSnap => comunidadNube.push({ id: docSnap.id, ...docSnap.data() }));
-    comunidadNube.sort((a,b) => b.creado - a.creado);
-
-    const snapT = await window.getDocs(window.colTrucos);
-    trucosNube = [];
-    snapT.forEach(docSnap => trucosNube.push({ id: docSnap.id, ...docSnap.data() }));
-    trucosNube.sort((a,b) => b.creado - a.creado);
-
-    if(carpetaActual) renderPlantillasCarpeta();
-    renderCarpetas();
-    if(document.getElementById('secComunidad').style.display === 'block') renderComunidad();
-    if(document.getElementById('secTrucos').style.display === 'block') renderTrucos();
-  } catch(e) {
-    console.error("Error cargando de la nube:", e);
-  }
-}
 
 function esAdmin() {
   return localStorage.getItem('tn_es_admin') === 'true';
@@ -352,4 +290,455 @@ function validarCodigoPro() {
 
 function cambiarPestana(p) {
   ['secPlantillas','secFavoritos','secTrabajos','secTrucos','secComunidad','secPro'].forEach(id => {
-    let sec = document.
+    let sec = document.getElementById(id);
+    if(sec) sec.style.display = 'none';
+  });
+
+  let secDestino = document.getElementById('sec' + p.charAt(0).toUpperCase() + p.slice(1));
+  if(secDestino) secDestino.style.display = 'block';
+
+  ['tPlantillas','tFavoritos','tTrabajos','tTrucos','tComunidad','tPro'].forEach(id => {
+    let btn = document.getElementById(id);
+    if(btn) btn.classList.remove('active');
+  });
+  let btnActive = document.getElementById('t' + p.charAt(0).toUpperCase() + p.slice(1));
+  if(btnActive) btnActive.classList.add('active');
+
+  if(p === 'plantillas') volverCarpetas();
+  if(p === 'favoritos') renderFavoritos();
+  if(p === 'trabajos') renderTrabajos();
+  if(p === 'trucos') renderTrucos();
+  if(p === 'comunidad') renderComunidad();
+  if(p === 'pro') verificarAccesoPro();
+}
+
+function renderCarpetas(filtro = '') {
+  const contenedor = document.getElementById('listaCarpetas');
+  if(!contenedor) return;
+  let html = '';
+  let catsFiltradas = categoriasCloud.filter(cat => cat.toLowerCase().includes(filtro.toLowerCase()));
+
+  catsFiltradas.forEach(cat => {
+    let itemsEnCat = plantillas.filter(p => p.cat === cat);
+    let cant = itemsEnCat.length;
+    let portadaImg = itemsEnCat.length > 0 ? itemsEnCat[0].imagen : '';
+
+    let portadaHtml = portadaImg ? `<img src="${portadaImg}" class="folder-cover">` : `<div class="folder-cover" style="display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;font-size:13px;">📁 ${cat}</div>`;
+
+    html += `
+      <div class="folder-card" onclick="abrirCarpeta('${cat}')">
+        ${portadaHtml}
+        <div class="folder-body">
+          <div class="folder-title">📁 ${cat}</div>
+          <div class="folder-count">${cant} plantillas</div>
+        </div>
+      </div>
+    `;
+  });
+  contenedor.innerHTML = html;
+}
+
+function filtrarPlantillasGlobal() {
+  let inputBusca = document.getElementById('inputBuscadorPlantillas');
+  renderCarpetas(inputBusca ? inputBusca.value : '');
+}
+
+function crearCategoriaLocal() {
+  if(!esAdmin()) { alert("🔒 Solo la Jefa puede crear categorías."); return; }
+  const inputCat = document.getElementById('nuevaCatNombre');
+  if(!inputCat) return;
+  const nombre = inputCat.value.trim();
+  if(!nombre) return alert("Escribe un nombre.");
+  if(categoriasCloud.includes(nombre)) return alert("Ya existe.");
+  categoriasCloud.push(nombre);
+  localStorage.setItem('tn_categorias', JSON.stringify(categoriasCloud));
+  inputCat.value = '';
+  renderCarpetas();
+  alert("¡Categoría añadida!");
+}
+
+function abrirCarpeta(cat) {
+  carpetaActual = cat;
+  let vCarpetas = document.getElementById('vistaCarpetas');
+  let vDetalle = document.getElementById('vistaDetalleCarpeta');
+  let tCat = document.getElementById('tituloCarpetaActual');
+  if(vCarpetas) vCarpetas.style.display = 'none';
+  if(vDetalle) vDetalle.style.display = 'block';
+  if(tCat) tCat.innerText = "Carpeta: " + cat;
+  renderPlantillasCarpeta();
+}
+
+function volverCarpetas() {
+  carpetaActual = null;
+  let vCarpetas = document.getElementById('vistaCarpetas');
+  let vDetalle = document.getElementById('vistaDetalleCarpeta');
+  if(vDetalle) vDetalle.style.display = 'none';
+  if(vCarpetas) vCarpetas.style.display = 'block';
+  let buscador = document.getElementById('inputBuscadorPlantillas');
+  if(buscador) buscador.value = '';
+  renderCarpetas();
+}
+
+// COMPRESOR INTELIGENTE PARA LÁMINAS GRANDES (Evita bloqueos)
+function comprimirImagenSegura(file, callback) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      let width = img.width;
+      let height = img.height;
+      
+      const maxDim = 1100; // Tamaño perfecto y nítido para calcar
+      if (width > height && width > maxDim) {
+        height *= maxDim / width;
+        width = maxDim;
+      } else if (height > maxDim) {
+        width *= maxDim / height;
+        height = maxDim;
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.80);
+      callback(dataUrl);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function subirPlantillaSegura() {
+  if(!esAdmin()) { alert("🔒 Solo la Jefa puede subir plantillas."); return; }
+  const archivoInput = document.getElementById('fotoPlantilla');
+  if(!archivoInput || !archivoInput.files[0]) return alert("Selecciona una imagen.");
+  const archivo = archivoInput.files[0];
+
+  alert("Optimizando lámina y subiendo... Un segundo.");
+
+  comprimirImagenSegura(archivo, function(imgOptimizada) {
+    try {
+      plantillas.push({ id: Date.now(), cat: carpetaActual, imagen: imgOptimizada });
+      localStorage.setItem('tn_plantillas', JSON.stringify(plantillas));
+      archivoInput.value = '';
+      renderPlantillasCarpeta();
+      alert("¡Lámina subida con éxito!");
+    } catch(err) {
+      alert("Error: la memoria del navegador está llena. Prueba a borrar alguna imagen antigua.");
+    }
+  });
+}
+
+function renderPlantillasCarpeta() {
+  const grid = document.getElementById('gridPlantillas');
+  if(!grid) return;
+  let filtradas = plantillas.filter(p => p.cat === carpetaActual);
+  let adminActivo = esAdmin();
+  
+  if(filtradas.length === 0) {
+    grid.innerHTML = '<p style="grid-column:span 2;text-align:center;color:var(--text-muted);font-size:12px;">No hay plantillas en esta categoría aún.</p>';
+    return;
+  }
+
+  let html = '';
+  filtradas.forEach((item) => {
+    let favoritosLocales = JSON.parse(localStorage.getItem('tn_favs') || '[]');
+    let esFav = favoritosLocales.includes(item.id);
+    let starClass = esFav ? 'fav-btn activo' : 'fav-btn';
+    let starSymbol = esFav ? '★' : '☆';
+
+    html += `
+      <div class="card">
+        <button class="${starClass}" onclick="toggleFavoritoLocal(event, '${item.id}')">${starSymbol}</button>
+        <div class="card-img-container" onclick="abrirViewer('${item.imagen}')">
+          <img src="${item.imagen}">
+        </div>
+        <p>Toca para calcar</p>
+        ${adminActivo ? `<button onclick="borrarPlantillaLocal(${item.id})" style="background:#fff;color:#e74c3c;border:1px solid #e74c3c;padding:4px;font-size:10px;width:80%;margin:0 auto 6px;cursor:pointer;border-radius:6px;">🗑️ Borrar</button>` : ''}
+      </div>
+    `;
+  });
+  grid.innerHTML = html;
+}
+
+function borrarPlantillaLocal(id) {
+  if(!esAdmin()) { alert("🔒 Solo la Jefa puede borrar."); return; }
+  if(confirm("¿Borrar esta plantilla?")) {
+    plantillas = plantillas.filter(p => p.id !== id);
+    localStorage.setItem('tn_plantillas', JSON.stringify(plantillas));
+    renderPlantillasCarpeta();
+  }
+}
+
+function toggleFavoritoLocal(evento, id) {
+  evento.stopPropagation();
+  let favoritosLocales = JSON.parse(localStorage.getItem('tn_favs') || '[]');
+  let index = favoritosLocales.indexOf(id);
+  if(index > -1) {
+    favoritosLocales.splice(index, 1);
+  } else {
+    favoritosLocales.push(id);
+  }
+  localStorage.setItem('tn_favs', JSON.stringify(favoritosLocales));
+  if(carpetaActual) renderPlantillasCarpeta();
+}
+
+function renderFavoritos() {
+  const grid = document.getElementById('gridFavoritos');
+  if(!grid) return;
+  let favoritosLocales = JSON.parse(localStorage.getItem('tn_favs') || '[]');
+  let favs = plantillas.filter(p => favoritosLocales.includes(p.id));
+
+  if(favs.length === 0) {
+    grid.innerHTML = '<p style="grid-column:span 2;text-align:center;color:var(--text-muted);font-size:12px;">No tienes favoritas aún.</p>';
+    return;
+  }
+  let html = '';
+  favs.forEach(item => {
+    html += `
+      <div class="card">
+        <button class="fav-btn active" onclick="toggleFavoritoLocal(event, '${item.id}')">★</button>
+        <div class="card-img-container" onclick="abrirViewer('${item.imagen}')">
+          <img src="${item.imagen}">
+        </div>
+        <p>📁 ${item.cat}</p>
+      </div>
+    `;
+  });
+  grid.innerHTML = html;
+}
+
+function procesarYGuardarTrabajo() {
+  const nombre = document.getElementById('nombreClienta').value.trim();
+  const colores = document.getElementById('coloresUsados').value.trim();
+  const archivoInput = document.getElementById('fotoTrabajo');
+  if(!archivoInput || !archivoInput.files[0]) return alert("Selecciona la foto.");
+  const archivo = archivoInput.files[0];
+
+  comprimirImagenSegura(archivo, function(imgOpt) {
+    trabajos.push({ id: Date.now(), nombre: nombre || "Manicura", colores: colores || "N/A", imagen: imgOpt });
+    localStorage.setItem('tn_trabajos', JSON.stringify(trabajos));
+    document.getElementById('nombreClienta').value = '';
+    document.getElementById('coloresUsados').value = '';
+    archivoInput.value = '';
+    renderTrabajos();
+    alert("¡Trabajo guardado!");
+  });
+}
+
+function renderTrabajos() {
+  const grid = document.getElementById('gridTrabajos');
+  if(!grid) return;
+  const textoBuscador = document.getElementById('inputBuscadorTrabajos') ? document.getElementById('inputBuscadorTrabajos').value.toLowerCase() : '';
+  let filtrados = trabajos.filter(t => t.nombre.toLowerCase().includes(textoBuscador) || t.colores.toLowerCase().includes(textoBuscador));
+
+  if(filtrados.length === 0) {
+    grid.innerHTML = '<p style="grid-column:span 2;text-align:center;color:var(--text-muted);font-size:12px;">No hay trabajos guardados.</p>';
+    return;
+  }
+  let html = '';
+  filtrados.forEach(t => {
+    html += `
+      <div class="card">
+        <div class="card-img-container" onclick="abrirViewer('${t.imagen}')">
+          <img src="${t.imagen}">
+        </div>
+        <p>💅 ${t.nombre}<br><small style="color:var(--text-muted)">${t.colores}</small></p>
+        <button onclick="borrarTrabajoLocal(${t.id})" style="background:#fff;color:#e74c3c;border:1px solid #e74c3c;padding:4px;font-size:10px;width:80%;margin:0 auto 6px;cursor:pointer;border-radius:6px;">🗑️ Borrar</button>
+      </div>
+    `;
+  });
+  grid.innerHTML = html;
+}
+
+function borrarTrabajoLocal(id) {
+  trabajos = trabajos.filter(t => t.id !== id);
+  localStorage.setItem('tn_trabajos', JSON.stringify(trabajos));
+  renderTrabajos();
+}
+
+function guardarTrucoSeguro() {
+  const titulo = document.getElementById('inputTituloTruco').value.trim();
+  const texto = document.getElementById('inputTextoTruco').value.trim();
+  const archivoInput = document.getElementById('archivoTruco');
+  const archivo = archivoInput ? archivoInput.files[0] : null;
+  if(!titulo || !texto) return alert("Rellena el título y el texto del truco.");
+
+  if(archivo) {
+    comprimirImagenSegura(archivo, function(imgOpt) {
+      trucos.push({ id: Date.now(), titulo, texto, media: imgOpt });
+      localStorage.setItem('tn_trucos', JSON.stringify(trucos));
+      document.getElementById('inputTituloTruco').value = '';
+      document.getElementById('inputTextoTruco').value = '';
+      archivoInput.value = '';
+      renderTrucos();
+      alert("¡Truco publicado!");
+    });
+  } else {
+    trucos.push({ id: Date.now(), titulo, texto, media: "" });
+    localStorage.setItem('tn_trucos', JSON.stringify(trucos));
+    document.getElementById('inputTituloTruco').value = '';
+    document.getElementById('inputTextoTruco').value = '';
+    renderTrucos();
+    alert("¡Truco publicado!");
+  }
+}
+
+function renderTrucos() {
+  const contenedor = document.getElementById('listaTrucos');
+  if(!contenedor) return;
+  if(trucos.length === 0) {
+    contenedor.innerHTML = '<div class="box"><p style="text-align:center;color:var(--text-muted);font-size:12px;">No hay trucos aún.</p></div>';
+    return;
+  }
+  let html = '';
+  trucos.forEach(t => {
+    let mediaHtml = t.media ? `<div class="card-img-container" onclick="abrirViewer('${t.media}')" style="margin-top:8px;border-radius:10px;overflow:hidden;"><img src="${t.media}"></div>` : '';
+    html += `
+      <div class="box">
+        <h4 style="margin:0 0 4px 0;color:var(--primary-dark);font-size:14px;">💡 ${t.titulo}</h4>
+        <p style="margin:0 0 8px 0;font-size:12px;color:var(--text-main);white-space:pre-wrap;">${t.texto}</p>
+        ${mediaHtml}
+        <button onclick="borrarTruco(${t.id})" style="background:#fff;color:#e74c3c;border:1px solid #e74c3c;padding:3px 8px;font-size:10px;width:auto;cursor:pointer;border-radius:6px;margin-top:8px;">🗑️ Borrar</button>
+      </div>
+    `;
+  });
+  contenedor.innerHTML = html;
+}
+
+function borrarTruco(id) {
+  trucos = trucos.filter(t => t.id !== id);
+  localStorage.setItem('tn_trucos', JSON.stringify(trucos));
+  renderTrucos();
+}
+
+function publicarComunidadSegura() {
+  const autor = document.getElementById('autorComunidad').value.trim();
+  const texto = document.getElementById('textoComunidad').value.trim();
+  const archivoInput = document.getElementById('fotoComunidad');
+  const archivo = archivoInput ? archivoInput.files[0] : null;
+  if(!autor || !texto) return alert("Rellena tu nombre y el texto.");
+
+  if(archivo) {
+    comprimirImagenSegura(archivo, function(imgOpt) {
+      comunidad.push({ id: Date.now(), autor, texto, imagen: imgOpt });
+      localStorage.setItem('tn_comunidad', JSON.stringify(comunidad));
+      document.getElementById('autorComunidad').value = '';
+      document.getElementById('textoComunidad').value = '';
+      archivoInput.value = '';
+      renderComunidad();
+      alert("¡Publicado en la comunidad!");
+    });
+  } else {
+    comunidad.push({ id: Date.now(), autor, texto, imagen: "" });
+    localStorage.setItem('tn_comunidad', JSON.stringify(comunidad));
+    document.getElementById('autorComunidad').value = '';
+    document.getElementById('textoComunidad').value = '';
+    renderComunidad();
+    alert("¡Publicado en la comunidad!");
+  }
+}
+
+function renderComunidad() {
+  const contenedor = document.getElementById('listaComunidad');
+  if(!contenedor) return;
+  if(comunidad.length === 0) {
+    contenedor.innerHTML = '<div class="box"><p style="text-align:center;color:var(--text-muted);font-size:12px;">No hay publicaciones todavía.</p></div>';
+    return;
+  }
+  let html = '';
+  comunidad.forEach(p => {
+    let imagenHtml = p.imagen ? `<div class="card-img-container" onclick="abrirViewer('${p.imagen}')" style="margin-top:8px;border-radius:10px;overflow:hidden;"><img src="${p.imagen}"></div>` : '';
+    html += `
+      <div class="box">
+        <b style="color:var(--primary-dark);font-size:13px;">💬 ${p.autor}</b>
+        <p style="margin:4px 0;font-size:12px;color:var(--text-main);white-space:pre-wrap;">${p.texto}</p>
+        ${imagenHtml}
+        <button onclick="borrarComunidad(${p.id})" style="background:#fff;color:#e74c3c;border:1px solid #e74c3c;padding:3px 8px;font-size:10px;width:auto;cursor:pointer;border-radius:6px;margin-top:8px;">🗑️ Borrar</button>
+      </div>
+    `;
+  });
+  contenedor.innerHTML = html;
+}
+
+function borrarComunidad(id) {
+  comunidad = comunidad.filter(p => p.id !== id);
+  localStorage.setItem('tn_comunidad', JSON.stringify(comunidad));
+  renderComunidad();
+}
+
+const viewer = document.getElementById('viewer');
+const imgGrande = document.getElementById('imgGrande');
+const zoomRange = document.getElementById('zoomRange');
+let bloqueado = false;
+let escala = 1, posX = 0, posY = 0;
+let startX = 0, startY = 0, dragging = false;
+
+function abrirViewer(src) {
+  imgGrande.src = src;
+  escala = 1; posX = 0; posY = 0;
+  zoomRange.value = 100;
+  actualizarTransform();
+  viewer.classList.add('on');
+  bloqueado = false;
+  viewer.classList.remove('bloqueado');
+  document.getElementById('lockBtn').innerText = "🔒 BLOQUEAR";
+}
+
+function cerrarViewer() {
+  if(!bloqueado) viewer.classList.remove('on');
+}
+
+function toggleLock() {
+  bloqueado = !bloqueado;
+  viewer.classList.toggle('bloqueado', bloqueado);
+  document.getElementById('lockBtn').innerText = bloqueado ? "🔓 DESBLOQUEAR" : "🔒 BLOQUEAR";
+}
+
+zoomRange.addEventListener('input', (e) => {
+  escala = e.target.value / 100;
+  actualizarTransform();
+});
+
+function actualizarTransform() {
+  imgGrande.style.transform = `translate(${posX}px, ${posY}px) scale(${escala})`;
+}
+
+imgGrande.addEventListener('pointerdown', (e) => {
+  if(bloqueado) return;
+  dragging = true;
+  startX = e.clientX - posX;
+  startY = e.clientY - posY;
+  imgGrande.setPointerCapture(e.pointerId);
+});
+
+imgGrande.addEventListener('pointermove', (e) => {
+  if(!dragging || bloqueado) return;
+  posX = e.clientX - startX;
+  posY = e.clientY - startY;
+  actualizarTransform();
+});
+
+imgGrande.addEventListener('pointerup', (e) => {
+  dragging = false;
+  try { imgGrande.releasePointerCapture(e.pointerId); } catch(err) {}
+});
+
+function buscarEnPinterest() {
+  const consulta = document.getElementById('busquedaWebInput').value.trim();
+  if(!consulta) { alert("Escribe algo para buscar."); return; }
+  window.open(`https://www.pinterest.com/search/pins/?q=${encodeURIComponent(consulta + ' nail art')}`, '_blank');
+}
+
+function buscarEnGoogle() {
+  const consulta = document.getElementById('busquedaWebInput').value.trim();
+  if(!consulta) { alert("Escribe algo para buscar."); return; }
+  window.open(`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(consulta + ' nail art')}`, '_blank');
+}
+</script>
+
+</body>
+</html>
