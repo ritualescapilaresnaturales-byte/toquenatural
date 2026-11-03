@@ -44,7 +44,7 @@ button.action-btn:hover{filter: brightness(1.1);}
 
 .card{background:var(--card-bg);border-radius:16px;overflow:hidden;border:1px solid var(--border-color);text-align:center;padding-bottom:10px;position:relative;box-shadow:0 4px 12px rgba(0,0,0,0.04);}
 .card-img-container{position:relative;width:100%;height:140px;cursor:pointer;background:#f5eeff;}
-.card img, .card video{width:100%;height:100%;object-fit:cover;display:block;}
+.card img{width:100%;height:100%;object-fit:cover;display:block;}
 .card p{font-size:11px;margin:8px;color:var(--text-muted);font-weight:600}
 
 .folder-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:10px;}
@@ -130,21 +130,21 @@ button.action-btn:hover{filter: brightness(1.1);}
     <div class="box" id="boxSubirPlantilla" style="display:none;">
       <b>🗂️ Subir Plantilla (Solo Jefa)</b>
       <input type="file" id="fotoPlantilla" accept="image/*">
-      <button class="action-btn" onclick="subirPlantillaSegura()">Subir Lámina</button>
+      <button class="action-btn" onclick="subirPlantillaLocal()">Subir Lámina</button>
     </div>
 
     <div class="grid" id="gridPlantillas"></div>
   </div>
 </div>
 
-<div id="secFavoritos" style="display:none;">
+<div id="secFavoritos" style="display:none; display:none;">
   <div class="box">
     <b>⭐ Tus Plantillas Favoritas</b>
   </div>
   <div class="grid" id="gridFavoritos"></div>
 </div>
 
-<div id="secTrabajos" style="display:none;">
+<div id="secTrabajos" style="display:none; display:none;">
   <div class="box">
     <b>🔍 Buscar trabajo guardado</b>
     <input type="text" id="inputBuscadorTrabajos" placeholder="Busca por cliente o esmalte..." oninput="renderTrabajos()">
@@ -159,31 +159,31 @@ button.action-btn:hover{filter: brightness(1.1);}
   <div class="grid" id="gridTrabajos"></div>
 </div>
 
-<div id="secTrucos" style="display:none;">
+<div id="secTrucos" style="display:none; display:none;">
   <div class="box">
     <b>💡 Rincón de Trucos y Técnicas</b>
     <p style="font-size:11px;color:var(--text-muted);margin:3px 0 8px;">Comparte fotos y explica tus trucos.</p>
     <input type="text" id="inputTituloTruco" placeholder="Título (Ej: Efecto blooming con capa fina)">
     <textarea id="inputTextoTruco" rows="3" placeholder="Explica el truco detalladamente..."></textarea>
     <input type="file" id="archivoTruco" accept="image/*,video/*">
-    <button class="action-btn" onclick="guardarTrucoSeguro()">Publicar Truco</button>
+    <button class="action-btn" onclick="guardarTrucoLocal()">Publicar Truco</button>
   </div>
   <div id="listaTrucos"></div>
 </div>
 
-<div id="secComunidad" style="display:none;">
+<div id="secComunidad" style="display:none; display:none;">
   <div class="box">
     <b>💬 Comunidad Exclusiva Toque Natural</b>
     <p style="font-size:11px;color:var(--text-muted);margin:3px 0 8px;">Comparte tus diseños y comenta con otros profesionales.</p>
     <input type="text" id="autorComunidad" placeholder="Tu nombre / Salón">
     <textarea id="textoComunidad" rows="3" placeholder="Escribe tu mensaje..."></textarea>
     <input type="file" id="fotoComunidad" accept="image/*">
-    <button class="action-btn" onclick="publicarComunidadSegura()">Publicar en Comunidad</button>
+    <button class="action-btn" onclick="publicarComunidadLocal()">Publicar en Comunidad</button>
   </div>
   <div id="listaComunidad"></div>
 </div>
 
-<div id="secPro" style="display:none;">
+<div id="secPro" style="display:none; display:none;">
   <div class="box" style="text-align:center;border:2px solid var(--primary);background:linear-gradient(180deg, #fff 0%, #faf4ff 100%);">
     <h3 style="color:var(--primary);margin-top:0;">✨ Toque Natural · Suscripción PRO</h3>
     <p id="estadoSuscripcion" style="font-size:13px;color:var(--text-muted);line-height:1.4;">
@@ -212,11 +212,16 @@ button.action-btn:hover{filter: brightness(1.1);}
 </div>
 
 <script>
-let categoriasCloud = JSON.parse(localStorage.getItem('tn_categorias') || JSON.stringify([
+let categoriasCloud = [
   "Halloween", "Flores", "Mariposas", "Corazones y románticos",
   "Navidad", "San Valentín", "Cáritas y expresiones", "Pestañas",
   "Animales", "Fantasía", "Dibujos animados / Disney", "Otros dibujos"
-]));
+];
+
+let savedCats = JSON.parse(localStorage.getItem('tn_categorias') || '[]');
+savedCats.forEach(c => {
+  if(!categoriasCloud.includes(c)) categoriasCloud.push(c);
+});
 
 let plantillas = JSON.parse(localStorage.getItem('tn_plantillas') || '[]');
 let trabajos = JSON.parse(localStorage.getItem('tn_trabajos') || '[]');
@@ -379,7 +384,6 @@ function volverCarpetas() {
   renderCarpetas();
 }
 
-// COMPRESOR INTELIGENTE PARA LÁMINAS GRANDES (Evita bloqueos)
 function comprimirImagenSegura(file, callback) {
   const reader = new FileReader();
   reader.onload = function(e) {
@@ -388,8 +392,7 @@ function comprimirImagenSegura(file, callback) {
       const canvas = document.createElement('canvas');
       let width = img.width;
       let height = img.height;
-      
-      const maxDim = 1100; // Tamaño perfecto y nítido para calcar
+      const maxDim = 1100;
       if (width > height && width > maxDim) {
         height *= maxDim / width;
         width = maxDim;
@@ -397,12 +400,10 @@ function comprimirImagenSegura(file, callback) {
         width *= maxDim / height;
         height = maxDim;
       }
-
       canvas.width = width;
       canvas.height = height;
       const ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0, width, height);
-      
       const dataUrl = canvas.toDataURL('image/jpeg', 0.80);
       callback(dataUrl);
     };
@@ -411,14 +412,13 @@ function comprimirImagenSegura(file, callback) {
   reader.readAsDataURL(file);
 }
 
-function subirPlantillaSegura() {
+function subirPlantillaLocal() {
   if(!esAdmin()) { alert("🔒 Solo la Jefa puede subir plantillas."); return; }
   const archivoInput = document.getElementById('fotoPlantilla');
   if(!archivoInput || !archivoInput.files[0]) return alert("Selecciona una imagen.");
   const archivo = archivoInput.files[0];
 
-  alert("Optimizando lámina y subiendo... Un segundo.");
-
+  alert("Optimizando lámina y subiendo...");
   comprimirImagenSegura(archivo, function(imgOptimizada) {
     try {
       plantillas.push({ id: Date.now(), cat: carpetaActual, imagen: imgOptimizada });
@@ -427,7 +427,7 @@ function subirPlantillaSegura() {
       renderPlantillasCarpeta();
       alert("¡Lámina subida con éxito!");
     } catch(err) {
-      alert("Error: la memoria del navegador está llena. Prueba a borrar alguna imagen antigua.");
+      alert("Error de espacio en el navegador.");
     }
   });
 }
@@ -560,7 +560,7 @@ function borrarTrabajoLocal(id) {
   renderTrabajos();
 }
 
-function guardarTrucoSeguro() {
+function guardarTrucoLocal() {
   const titulo = document.getElementById('inputTituloTruco').value.trim();
   const texto = document.getElementById('inputTextoTruco').value.trim();
   const archivoInput = document.getElementById('archivoTruco');
@@ -615,7 +615,7 @@ function borrarTruco(id) {
   renderTrucos();
 }
 
-function publicarComunidadSegura() {
+function publicarComunidadLocal() {
   const autor = document.getElementById('autorComunidad').value.trim();
   const texto = document.getElementById('textoComunidad').value.trim();
   const archivoInput = document.getElementById('fotoComunidad');
