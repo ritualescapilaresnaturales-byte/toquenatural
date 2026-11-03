@@ -109,6 +109,13 @@ button.action-btn:hover{filter: brightness(1.1);}
       <button class="action-btn" onclick="crearCategoriaLocal()">Crear Categoría</button>
     </div>
 
+    <!-- BOTÓN DE EMERGENCIA PARA LIBERAR MEMORIA SI SE BLOQUEA -->
+    <div class="box" id="boxResetTotal" style="display:none;background:#fff5f5;border:1px solid #feb2b2;">
+      <b style="color:#c53030;">⚠️ Zona de Jefa: Limpieza de Emergencia</b>
+      <p style="font-size:11px;color:#742a2a;margin:4px 0 8px;">Si alguna vez notas que una imagen no se borra o la memoria se satura, pulsa aquí para vaciar el espacio dañado:</p>
+      <button onclick="limpiarMemoriaForzosa()" style="background:#e53e3e;color:#fff;border:none;padding:8px;border-radius:8px;font-weight:bold;cursor:pointer;width:100%;">🗑️ Borrar caché y vaciar galería</button>
+    </div>
+
     <div style="font-size:13px;font-weight:700;margin:14px 0 8px 4px;color:var(--primary-dark);">📁 Categorías de Plantillas:</div>
     <div class="folder-grid" id="listaCarpetas"></div>
 
@@ -137,14 +144,14 @@ button.action-btn:hover{filter: brightness(1.1);}
   </div>
 </div>
 
-<div id="secFavoritos" style="display:none; display:none;">
+<div id="secFavoritos" style="display:none;">
   <div class="box">
     <b>⭐ Tus Plantillas Favoritas</b>
   </div>
   <div class="grid" id="gridFavoritos"></div>
 </div>
 
-<div id="secTrabajos" style="display:none; display:none;">
+<div id="secTrabajos" style="display:none;">
   <div class="box">
     <b>🔍 Buscar trabajo guardado</b>
     <input type="text" id="inputBuscadorTrabajos" placeholder="Busca por cliente o esmalte..." oninput="renderTrabajos()">
@@ -159,7 +166,7 @@ button.action-btn:hover{filter: brightness(1.1);}
   <div class="grid" id="gridTrabajos"></div>
 </div>
 
-<div id="secTrucos" style="display:none; display:none;">
+<div id="secTrucos" style="display:none;">
   <div class="box">
     <b>💡 Rincón de Trucos y Técnicas</b>
     <p style="font-size:11px;color:var(--text-muted);margin:3px 0 8px;">Comparte fotos y explica tus trucos.</p>
@@ -171,7 +178,7 @@ button.action-btn:hover{filter: brightness(1.1);}
   <div id="listaTrucos"></div>
 </div>
 
-<div id="secComunidad" style="display:none; display:none;">
+<div id="secComunidad" style="display:none;">
   <div class="box">
     <b>💬 Comunidad Exclusiva Toque Natural</b>
     <p style="font-size:11px;color:var(--text-muted);margin:3px 0 8px;">Comparte tus diseños y comenta con otros profesionales.</p>
@@ -183,7 +190,7 @@ button.action-btn:hover{filter: brightness(1.1);}
   <div id="listaComunidad"></div>
 </div>
 
-<div id="secPro" style="display:none; display:none;">
+<div id="secPro" style="display:none;">
   <div class="box" style="text-align:center;border:2px solid var(--primary);background:linear-gradient(180deg, #fff 0%, #faf4ff 100%);">
     <h3 style="color:var(--primary);margin-top:0;">✨ Toque Natural · Suscripción PRO</h3>
     <p id="estadoSuscripcion" style="font-size:13px;color:var(--text-muted);line-height:1.4;">
@@ -249,9 +256,11 @@ function verificarAccesoPro() {
   let adminActivo = esAdmin();
   let boxCrear = document.getElementById('boxCrearCat');
   let boxSubir = document.getElementById('boxSubirPlantilla');
+  let boxReset = document.getElementById('boxResetTotal');
   
   if(boxCrear) boxCrear.style.display = adminActivo ? 'block' : 'none';
   if(boxSubir) boxSubir.style.display = adminActivo ? 'block' : 'none';
+  if(boxReset) boxReset.style.display = adminActivo ? 'block' : 'none';
 
   if(estadoTxt) {
     if(adminActivo) {
@@ -384,6 +393,18 @@ function volverCarpetas() {
   renderCarpetas();
 }
 
+// BOTÓN DE LIMPIEZA TOTAL PARA EVITAR QUE SE QUEDE ATASCADO
+function limpiarMemoriaForzosa() {
+  if(confirm("¿Seguro que quieres vaciar la memoria y limpiar las imágenes atascadas?")) {
+    localStorage.removeItem('tn_plantillas');
+    plantillas = [];
+    renderCarpetas();
+    if(carpetaActual) renderPlantillasCarpeta();
+    alert("¡Memoria limpiada con éxito! Ya puedes subir tus fotos limpias.");
+  }
+}
+
+// COMPRESOR SÚPER LIGERO PARA LÁMINAS
 function comprimirImagenSegura(file, callback) {
   const reader = new FileReader();
   reader.onload = function(e) {
@@ -392,7 +413,8 @@ function comprimirImagenSegura(file, callback) {
       const canvas = document.createElement('canvas');
       let width = img.width;
       let height = img.height;
-      const maxDim = 1100;
+      
+      const maxDim = 900; // Tamaño optimizado para que no ocupe espacio innecesario
       if (width > height && width > maxDim) {
         height *= maxDim / width;
         width = maxDim;
@@ -400,11 +422,13 @@ function comprimirImagenSegura(file, callback) {
         width *= maxDim / height;
         height = maxDim;
       }
+
       canvas.width = width;
       canvas.height = height;
       const ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0, width, height);
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.80);
+      
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.75);
       callback(dataUrl);
     };
     img.src = e.target.result;
@@ -418,7 +442,7 @@ function subirPlantillaLocal() {
   if(!archivoInput || !archivoInput.files[0]) return alert("Selecciona una imagen.");
   const archivo = archivoInput.files[0];
 
-  alert("Optimizando lámina y subiendo...");
+  alert("Optimizando y guardando lámina...");
   comprimirImagenSegura(archivo, function(imgOptimizada) {
     try {
       plantillas.push({ id: Date.now(), cat: carpetaActual, imagen: imgOptimizada });
@@ -427,7 +451,7 @@ function subirPlantillaLocal() {
       renderPlantillasCarpeta();
       alert("¡Lámina subida con éxito!");
     } catch(err) {
-      alert("Error de espacio en el navegador.");
+      alert("Memoria llena. Entra arriba en 'Limpieza de Emergencia' para vaciar espacio.");
     }
   });
 }
