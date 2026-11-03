@@ -218,19 +218,8 @@ let categoriasCloud = JSON.parse(localStorage.getItem('tn_categorias') || JSON.s
   "Animales", "Fantasía", "Dibujos animados / Disney", "Otros dibujos"
 ]));
 
-// Plantillas sincronizadas para que cualquier dispositivo (como el de tu madre) las vea al abrir la web
-let plantillasIniciales = [
-  { id: 1, cat: "Halloween", imagen: "1792920682758.jpg" },
-  { id: 2, cat: "Halloween", imagen: "1792920682758.jpg" },
-  { id: 3, cat: "Flores", imagen: "1792920682758.jpg" },
-  { id: 4, cat: "Dibujos animados / Disney", imagen: "1792920682758.jpg" }
-];
-
-let plantillasGuardadas = JSON.parse(localStorage.getItem('tn_plantillas') || 'null');
-let plantillas = plantillasGuardadas !== null ? plantillasGuardadas : plantillasIniciales;
-if(plantillasGuardadas === null) {
-  localStorage.setItem('tn_plantillas', JSON.stringify(plantillas));
-}
+// Empezamos con las carpetas completamente limpias de relleno
+let plantillas = JSON.parse(localStorage.getItem('tn_plantillas') || '[]');
 
 let trabajos = JSON.parse(localStorage.getItem('tn_trabajos') || '[]');
 let trucos = JSON.parse(localStorage.getItem('tn_trucos') || '[]');
