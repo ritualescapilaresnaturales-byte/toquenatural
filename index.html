@@ -78,22 +78,22 @@ button.action-btn:hover{filter: brightness(1.1);}
 
 <header>
   <div class="top-admin-btn">
-    <button onclick="cambiarPestana('pro')">🔒 Acceso</button>
+    <button type="button" onclick="cambiarPestana('pro')">🔒 Acceso</button>
   </div>
 
   <div class="brand-logo-wrapper">
-    <img id="logoImg" class="brand-logo" src="1792920682758.jpg" alt="Logotipo Toque Natural">
+    <img id="logoImg" class="brand-logo" src="1792920682758.jpg" alt="Logotipo Toque Natural" onerror="this.style.display='none'">
   </div>
   <div class="brand-subtext">TOQUE NATURAL · NAIL ART PRO</div>
 </header>
 
 <nav class="bottom-nav">
-  <button id="tPlantillas" class="active" onclick="cambiarPestana('plantillas')"><span>📁</span>Plantillas</button>
-  <button id="tFavoritos" onclick="cambiarPestana('favoritos')"><span>⭐</span>Favoritos</button>
-  <button id="tTrabajos" onclick="cambiarPestana('trabajos')"><span>💅</span>Trabajos</button>
-  <button id="tTrucos" onclick="cambiarPestana('trucos')"><span>💡</span>Trucos</button>
-  <button id="tComunidad" onclick="cambiarPestana('comunidad')"><span>💬</span>Comunidad</button>
-  <button id="tPro" onclick="cambiarPestana('pro')"><span>✨</span>PRO</button>
+  <button type="button" id="tPlantillas" class="active" onclick="cambiarPestana('plantillas')"><span>📁</span>Plantillas</button>
+  <button type="button" id="tFavoritos" onclick="cambiarPestana('favoritos')"><span>⭐</span>Favoritos</button>
+  <button type="button" id="tTrabajos" onclick="cambiarPestana('trabajos')"><span>💅</span>Trabajos</button>
+  <button type="button" id="tTrucos" onclick="cambiarPestana('trucos')"><span>💡</span>Trucos</button>
+  <button type="button" id="tComunidad" onclick="cambiarPestana('comunidad')"><span>💬</span>Comunidad</button>
+  <button type="button" id="tPro" onclick="cambiarPestana('pro')"><span>✨</span>PRO</button>
 </nav>
 
 <div id="secPlantillas">
@@ -106,14 +106,13 @@ button.action-btn:hover{filter: brightness(1.1);}
     <div class="box" id="boxCrearCat" style="display:none;">
       <b>➕ Crear nueva categoría (Modo Jefa)</b>
       <input type="text" id="nuevaCatNombre" placeholder="Nombre (ej. Halloween, Flores...)">
-      <button class="action-btn" onclick="crearCategoriaLocal()">Crear Categoría</button>
+      <button type="button" class="action-btn" onclick="crearCategoriaLocal()">Crear Categoría</button>
     </div>
 
-    <!-- ZONA OCULTA: Solo aparece si eres Jefa -->
     <div class="box" id="boxResetTotal" style="display:none;background:#fff5f5;border:1px solid #feb2b2;">
       <b style="color:#c53030;">⚠️ Zona de Jefa: Limpieza de Emergencia</b>
       <p style="font-size:11px;color:#742a2a;margin:4px 0 8px;">Si se satura la memoria, pulsa aquí para vaciar el espacio:</p>
-      <button onclick="limpiarMemoriaForzosa()" style="background:#e53e3e;color:#fff;border:none;padding:8px;border-radius:8px;font-weight:bold;cursor:pointer;width:100%;">🗑️ Borrar caché y vaciar galería</button>
+      <button type="button" onclick="limpiarMemoriaForzosa()" style="background:#e53e3e;color:#fff;border:none;padding:8px;border-radius:8px;font-weight:bold;cursor:pointer;width:100%;">🗑️ Borrar caché y vaciar galería</button>
     </div>
 
     <div style="font-size:13px;font-weight:700;margin:14px 0 8px 4px;color:var(--primary-dark);">📁 Categorías de Plantillas:</div>
@@ -124,20 +123,20 @@ button.action-btn:hover{filter: brightness(1.1);}
       <p style="font-size:11px;color:var(--text-muted);margin:2px 0 8px;">Escribe lo que buscas y elige dónde buscar:</p>
       <input type="text" id="busquedaWebInput" placeholder="Ej. Uñas flores, minimalista...">
       <div class="web-search-box">
-        <button class="action-btn" style="background:#bd081c;" onclick="buscarEnPinterest()">Pinterest</button>
-        <button class="action-btn" style="background:#4285F4;" onclick="buscarEnGoogle()">Google Imágenes</button>
+        <button type="button" class="action-btn" style="background:#bd081c;" onclick="buscarEnPinterest()">Pinterest</button>
+        <button type="button" class="action-btn" style="background:#4285F4;" onclick="buscarEnGoogle()">Google Imágenes</button>
       </div>
     </div>
   </div>
 
   <div id="vistaDetalleCarpeta" style="display:none;">
-    <button class="action-btn" style="width:auto;padding:8px 14px;margin-bottom:12px;background:#e2d1f9;color:var(--primary-dark);" onclick="volverCarpetas()">⬅️ Volver a Categorías</button>
+    <button type="button" class="action-btn" style="width:auto;padding:8px 14px;margin-bottom:12px;background:#e2d1f9;color:var(--primary-dark);" onclick="volverCarpetas()">⬅️ Volver a Categorías</button>
     <h3 id="tituloCarpetaActual" style="margin:5px 0 12px;font-size:16px;color:var(--primary-dark);"></h3>
 
     <div class="box" id="boxSubirPlantilla" style="display:none;">
       <b>🗂️ Subir Plantilla (Solo Jefa)</b>
       <input type="file" id="fotoPlantilla" accept="image/*">
-      <button class="action-btn" onclick="subirPlantillaLocal()">Subir Lámina</button>
+      <button type="button" class="action-btn" onclick="subirPlantillaLocal()">Subir Lámina</button>
     </div>
 
     <div class="grid" id="gridPlantillas"></div>
@@ -151,7 +150,6 @@ button.action-btn:hover{filter: brightness(1.1);}
   <div class="grid" id="gridFavoritos"></div>
 </div>
 
-<!-- SECCIÓN TRABAJOS (EXCLUSIVO PRO) -->
 <div id="secTrabajos" style="display:none;">
   <div id="contenidoTrabajosPro" style="display:none;">
     <div class="box">
@@ -163,7 +161,7 @@ button.action-btn:hover{filter: brightness(1.1);}
       <input type="text" id="nombreClienta" placeholder="Nombre de la cliente/diseño">
       <input type="text" id="coloresUsados" placeholder="Esmaltes usados">
       <input type="file" id="fotoTrabajo" accept="image/*">
-      <button class="action-btn" onclick="procesarYGuardarTrabajo()">Guardar Trabajo</button>
+      <button type="button" class="action-btn" onclick="procesarYGuardarTrabajo()">Guardar Trabajo</button>
     </div>
     <div class="grid" id="gridTrabajos"></div>
   </div>
@@ -171,51 +169,49 @@ button.action-btn:hover{filter: brightness(1.1);}
     <div style="text-align:center;">
       <h3 style="color:var(--primary);">🔒 Contenido Exclusivo PRO</h3>
       <p style="font-size:13px;color:var(--text-muted);">El registro y la galería de trabajos solo están disponibles para cuentas PRO y suscritas.</p>
-      <button class="action-btn" onclick="cambiarPestana('pro')">✨ Activar acceso PRO</button>
+      <button type="button" class="action-btn" onclick="cambiarPestana('pro')">✨ Activar acceso PRO</button>
     </div>
   </div>
 </div>
 
-<!-- SECCIÓN TRUCOS (BLOQUEADA PARA NO PROS) -->
 <div id="secTrucos" style="display:none;">
-  <div id="contenidoTrucosPro">
+  <div id="contenidoTrucosPro" style="display:none;">
     <div class="box">
       <b>💡 Rincón de Trucos y Técnicas (Exclusivo PRO)</b>
       <p style="font-size:11px;color:var(--text-muted);margin:3px 0 8px;">Comparte fotos y explica tus trucos profesionales.</p>
       <input type="text" id="inputTituloTruco" placeholder="Título (Ej: Efecto blooming con capa fina)">
       <textarea id="inputTextoTruco" rows="3" placeholder="Explica el truco detalladamente..."></textarea>
       <input type="file" id="archivoTruco" accept="image/*,video/*">
-      <button class="action-btn" onclick="guardarTrucoLocal()">Publicar Truco</button>
+      <button type="button" class="action-btn" onclick="guardarTrucoLocal()">Publicar Truco</button>
     </div>
     <div id="listaTrucos"></div>
   </div>
-  <div id="avisoTrucosBloqueado" style="display:none;" class="box">
+  <div id="avisoTrucosBloqueado" class="box">
     <div style="text-align:center;">
       <h3 style="color:var(--primary);">🔒 Contenido Exclusivo PRO</h3>
       <p style="font-size:13px;color:var(--text-muted);">El rincón de trucos y técnicas solo está disponible para cuentas PRO y suscritas.</p>
-      <button class="action-btn" onclick="cambiarPestana('pro')">✨ Activar acceso PRO</button>
+      <button type="button" class="action-btn" onclick="cambiarPestana('pro')">✨ Activar acceso PRO</button>
     </div>
   </div>
 </div>
 
-<!-- SECCIÓN COMUNIDAD (BLOQUEADA PARA NO PROS) -->
 <div id="secComunidad" style="display:none;">
-  <div id="contenidoComunidadPro">
+  <div id="contenidoComunidadPro" style="display:none;">
     <div class="box">
       <b>💬 Comunidad Exclusiva Toque Natural (Exclusivo PRO)</b>
       <p style="font-size:11px;color:var(--text-muted);margin:3px 0 8px;">Comparte tus diseños y comenta con otros profesionales.</p>
       <input type="text" id="autorComunidad" placeholder="Tu nombre / Salón">
       <textarea id="textoComunidad" rows="3" placeholder="Escribe tu mensaje..."></textarea>
       <input type="file" id="fotoComunidad" accept="image/*">
-      <button class="action-btn" onclick="publicarComunidadLocal()">Publicar en Comunidad</button>
+      <button type="button" class="action-btn" onclick="publicarComunidadLocal()">Publicar en Comunidad</button>
     </div>
     <div id="listaComunidad"></div>
   </div>
-  <div id="avisoComunidadBloqueado" style="display:none;" class="box">
+  <div id="avisoComunidadBloqueado" class="box">
     <div style="text-align:center;">
       <h3 style="color:var(--primary);">🔒 Comunidad Exclusiva PRO</h3>
       <p style="font-size:13px;color:var(--text-muted);">El chat de la comunidad es un espacio reservado para profesionales suscritos.</p>
-      <button class="action-btn" onclick="cambiarPestana('pro')">✨ Activar acceso PRO</button>
+      <button type="button" class="action-btn" onclick="cambiarPestana('pro')">✨ Activar acceso PRO</button>
     </div>
   </div>
 </div>
@@ -230,17 +226,17 @@ button.action-btn:hover{filter: brightness(1.1);}
     <div style="background:#fff;padding:14px;border-radius:14px;border:1px solid var(--border-color);margin:14px 0;text-align:left;box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
       <b>📱 Introduce tu contraseña de Jefa o código mensual</b>
       <input type="text" id="inputCodigoPro" placeholder="Introduce tu clave secreta..." style="margin-top:10px;">
-      <button class="action-btn" style="margin-top:8px;" onclick="validarCodigoPro()">Activar Acceso</button>
+      <button type="button" class="action-btn" style="margin-top:8px;" onclick="validarCodigoPro()">Activar Acceso</button>
     </div>
 
-    <button class="action-btn" style="background: #25d366; box-shadow: 0 4px 15px rgba(37,211,102,0.3); margin-top:10px;" onclick="window.open('https://wa.me/34620391597?text=Hola,%20quiero%20mi%20código%20mensual%20PRO%20de%20Toque%20Natural%20por%209,99€','_blank')">💬 Pedir código por WhatsApp</button>
+    <button type="button" class="action-btn" style="background: #25d366; box-shadow: 0 4px 15px rgba(37,211,102,0.3); margin-top:10px;" onclick="window.open('https://wa.me/34620391597?text=Hola,%20quiero%20mi%20código%20mensual%20PRO%20de%20Toque%20Natural%20por%209,99€','_blank')">💬 Pedir código por WhatsApp</button>
   </div>
 </div>
 
 <div id="viewer">
   <div class="vtop">
-    <button class="close" onclick="cerrarViewer()">✕ Cerrar</button>
-    <button id="lockBtn" onclick="toggleLock()">🔒 BLOQUEAR</button>
+    <button type="button" class="close" onclick="cerrarViewer()">✕ Cerrar</button>
+    <button type="button" id="lockBtn" onclick="toggleLock()">🔒 BLOQUEAR</button>
   </div>
   <div class="vstage" id="vstage"><img id="imgGrande" alt="Ampliada"></div>
   <div class="vbottom" id="controls">
@@ -249,90 +245,664 @@ button.action-btn:hover{filter: brightness(1.1);}
 </div>
 
 <script>
-let categoriasCloud = [
+var categoriasCloud = [
   "Halloween", "Flores", "Mariposas", "Corazones y románticos",
   "Navidad", "San Valentín", "Cáritas y expresiones", "Pestañas",
   "Animales", "Fantasía", "Dibujos animados / Disney", "Otros dibujos"
 ];
 
-let savedCats = JSON.parse(localStorage.getItem('tn_categorias') || '[]');
-savedCats.forEach(c => {
-  if(!categoriasCloud.includes(c)) categoriasCloud.push(c);
-});
+var plantillas = [];
+var trabajos = [];
+var trucos = [];
+var comunidad = [];
+var carpetaActual = null;
 
-let plantillas = JSON.parse(localStorage.getItem('tn_plantillas') || '[]');
-let trabajos = JSON.parse(localStorage.getItem('tn_trabajos') || '[]');
-let trucos = JSON.parse(localStorage.getItem('tn_trucos') || '[]');
-let comunidad = JSON.parse(localStorage.getItem('tn_comunidad') || '[]');
-let carpetaActual = null;
-
-window.addEventListener('DOMContentLoaded', () => {
-  verificarAccesoPro();
-  renderCarpetas();
-});
+function cargarDatosLocales() {
+  try {
+    var savedCats = JSON.parse(localStorage.getItem('tn_categorias') || '[]');
+    if (Array.isArray(savedCats)) {
+      savedCats.forEach(function(c) {
+        if (categoriasCloud.indexOf(c) === -1) categoriasCloud.push(c);
+      });
+    }
+    plantillas = JSON.parse(localStorage.getItem('tn_plantillas') || '[]') || [];
+    trabajos = JSON.parse(localStorage.getItem('tn_trabajos') || '[]') || [];
+    trucos = JSON.parse(localStorage.getItem('tn_trucos') || '[]') || [];
+    comunidad = JSON.parse(localStorage.getItem('tn_comunidad') || '[]') || [];
+  } catch (e) {
+    console.error("Error leyendo almacenamiento:", e);
+  }
+}
 
 function esAdmin() {
   return localStorage.getItem('tn_es_admin') === 'true';
 }
 
 function esProActivo() {
-  let expira = localStorage.getItem('tn_pro_expira');
-  let ahora = Date.now();
-  return esAdmin() || (expira && ahora < parseInt(expira));
+  var expira = localStorage.getItem('tn_pro_expira');
+  var ahora = Date.now();
+  return esAdmin() || (expira && ahora < parseInt(expira, 10));
 }
 
 function verificarAccesoPro() {
-  let estadoTxt = document.getElementById('estadoSuscripcion');
-  let adminActivo = esAdmin();
-  let proActivo = esProActivo();
+  var estadoTxt = document.getElementById('estadoSuscripcion');
+  var adminActivo = esAdmin();
+  var proActivo = esProActivo();
 
-  let boxCrear = document.getElementById('boxCrearCat');
-  let boxSubir = document.getElementById('boxSubirPlantilla');
-  let boxReset = document.getElementById('boxResetTotal');
+  var boxCrear = document.getElementById('boxCrearCat');
+  var boxSubir = document.getElementById('boxSubirPlantilla');
+  var boxReset = document.getElementById('boxResetTotal');
 
-  if(boxCrear) boxCrear.style.display = adminActivo ? 'block' : 'none';
-  if(boxSubir) boxSubir.style.display = adminActivo ? 'block' : 'none';
-  if(boxReset) boxReset.style.display = adminActivo ? 'block' : 'none';
+  if (boxCrear) boxCrear.style.display = adminActivo ? 'block' : 'none';
+  if (boxSubir) boxSubir.style.display = adminActivo ? 'block' : 'none';
+  if (boxReset) boxReset.style.display = adminActivo ? 'block' : 'none';
 
-  // Bloquear o desbloquear Trabajos, Trucos y Comunidad según si es PRO o Jefa
-  let contenidoTrabajos = document.getElementById('contenidoTrabajosPro');
-  let avisoTrabajos = document.getElementById('avisoTrabajosBloqueado');
-  let contenidoTrucos = document.getElementById('contenidoTrucosPro');
-  let avisoTrucos = document.getElementById('avisoTrucosBloqueado');
-  let contenidoComunidad = document.getElementById('contenidoComunidadPro');
-  let avisoComunidad = document.getElementById('avisoComunidadBloqueado');
+  var contenidoTrabajos = document.getElementById('contenidoTrabajosPro');
+  var avisoTrabajos = document.getElementById('avisoTrabajosBloqueado');
+  var contenidoTrucos = document.getElementById('contenidoTrucosPro');
+  var avisoTrucos = document.getElementById('avisoTrucosBloqueado');
+  var contenidoComunidad = document.getElementById('contenidoComunidadPro');
+  var avisoComunidad = document.getElementById('avisoComunidadBloqueado');
 
-  if(proActivo) {
-    if(contenidoTrabajos) contenidoTrabajos.style.display = 'block';
-    if(avisoTrabajos) avisoTrabajos.style.display = 'none';
-    if(contenidoTrucos) contenidoTrucos.style.display = 'block';
-    if(avisoTrucos) avisoTrucos.style.display = 'none';
-    if(contenidoComunidad) contenidoComunidad.style.display = 'block';
-    if(avisoComunidad) avisoComunidad.style.display = 'none';
+  if (proActivo) {
+    if (contenidoTrabajos) contenidoTrabajos.style.display = 'block';
+    if (avisoTrabajos) avisoTrabajos.style.display = 'none';
+    if (contenidoTrucos) contenidoTrucos.style.display = 'block';
+    if (avisoTrucos) avisoTrucos.style.display = 'none';
+    if (contenidoComunidad) contenidoComunidad.style.display = 'block';
+    if (avisoComunidad) avisoComunidad.style.display = 'none';
   } else {
-    if(contenidoTrabajos) contenidoTrabajos.style.display = 'none';
-    if(avisoTrabajos) avisoTrabajos.style.display = 'block';
-    if(contenidoTrucos) contenidoTrucos.style.display = 'none';
-    if(avisoTrucos) avisoTrucos.style.display = 'block';
-    if(contenidoComunidad) contenidoComunidad.style.display = 'none';
-    if(avisoComunidad) avisoComunidad.style.display = 'block';
+    if (contenidoTrabajos) contenidoTrabajos.style.display = 'none';
+    if (avisoTrabajos) avisoTrabajos.style.display = 'block';
+    if (contenidoTrucos) contenidoTrucos.style.display = 'none';
+    if (avisoTrucos) avisoTrucos.style.display = 'block';
+    if (contenidoComunidad) contenidoComunidad.style.display = 'none';
+    if (avisoComunidad) avisoComunidad.style.display = 'block';
   }
 
-  if(estadoTxt) {
-    if(adminActivo) {
-      estadoTxt.innerHTML = `✨ <b style="color:green;">¡Modo Jefa Activo!</b> Tienes control total.`;
-    } else if(proActivo) {
-      estadoTxt.innerHTML = `✨ <b style="color:green;">¡Acceso PRO Activo!</b> Disfruta de la comunidad y trucos.`;
+  if (estadoTxt) {
+    if (adminActivo) {
+      estadoTxt.innerHTML = '✨ <b style="color:green;">¡Modo Jefa Activo!</b> Tienes control total.';
+    } else if (proActivo) {
+      estadoTxt.innerHTML = '✨ <b style="color:green;">¡Acceso PRO Activo!</b> Disfruta de los trabajos, trucos y comunidad.';
     } else {
-      estadoTxt.innerHTML = `Desbloquea todas las plantillas, trucos y la comunidad por solo <b style="color:var(--primary);">9,99 € al mes</b>.`;
+      estadoTxt.innerHTML = 'Desbloquea todas las plantillas, trabajos, trucos y la comunidad por solo <b style="color:var(--primary);">9,99 € al mes</b>.';
     }
   }
 }
 
 function validarCodigoPro() {
-  let inputElem = document.getElementById('inputCodigoPro');
-  if(!inputElem) return;
-  let codigoIngresado = inputElem.value.trim();
-  if(!codigoIngresado) return alert("Introduce una contraseña o código.");
+  var inputElem = document.getElementById('inputCodigoPro');
+  if (!inputElem) return;
+  var codigoIngresado = inputElem.value.trim();
+  if (!codigoIngresado) {
+    alert("Introduce una contraseña o código.");
+    return;
+  }
 
-  if(codigoIngresado === "Jefa22" || codigoIngresado
+  if (codigoIngresado === "Jefa22" || codigoIngresado === "jefa22") {
+    localStorage.setItem('tn_es_admin', 'true');
+    localStorage.setItem('tn_pro_expira', String(Date.now() + 365 * 24 * 60 * 60 * 1000));
+    inputElem.value = '';
+    verificarAccesoPro();
+    alert("¡Hola Jefa! Modo administración activado con éxito.");
+    cambiarPestana('plantillas');
+    return;
+  }
+
+  var codigoMesActual = localStorage.getItem('tn_codigo_mes_actual') || "NOVIEMBRE26";
+  if (codigoIngresado.toUpperCase() === codigoMesActual.toUpperCase()) {
+    var fechaExpiracion = Date.now() + (30 * 24 * 60 * 60 * 1000);
+    localStorage.setItem('tn_pro_expira', String(fechaExpiracion));
+    inputElem.value = '';
+    verificarAccesoPro();
+    alert("¡Código PRO validado con éxito!");
+    cambiarPestana('plantillas');
+  } else {
+    alert("Contraseña o código incorrecto.");
+  }
+}
+
+function cambiarPestana(p) {
+  var secciones = ['secPlantillas', 'secFavoritos', 'secTrabajos', 'secTrucos', 'secComunidad', 'secPro'];
+  secciones.forEach(function(id) {
+    var sec = document.getElementById(id);
+    if (sec) sec.style.display = 'none';
+  });
+
+  var secDestino = document.getElementById('sec' + p.charAt(0).toUpperCase() + p.slice(1));
+  if (secDestino) secDestino.style.display = 'block';
+
+  var botones = ['tPlantillas', 'tFavoritos', 'tTrabajos', 'tTrucos', 'tComunidad', 'tPro'];
+  botones.forEach(function(id) {
+    var btn = document.getElementById(id);
+    if (btn) btn.classList.remove('active');
+  });
+
+  var btnActive = document.getElementById('t' + p.charAt(0).toUpperCase() + p.slice(1));
+  if (btnActive) btnActive.classList.add('active');
+
+  verificarAccesoPro();
+
+  if (p === 'plantillas') volverCarpetas();
+  if (p === 'favoritos') renderFavoritos();
+  if (p === 'trabajos' && esProActivo()) renderTrabajos();
+  if (p === 'trucos' && esProActivo()) renderTrucos();
+  if (p === 'comunidad' && esProActivo()) renderComunidad();
+}
+
+function renderCarpetas(filtro) {
+  var textoFiltro = (filtro || '').toLowerCase();
+  var contenedor = document.getElementById('listaCarpetas');
+  if (!contenedor) return;
+
+  var html = '';
+  var catsFiltradas = categoriasCloud.filter(function(cat) {
+    return cat.toLowerCase().indexOf(textoFiltro) !== -1;
+  });
+
+  catsFiltradas.forEach(function(cat) {
+    var itemsEnCat = plantillas.filter(function(p) { return p.cat === cat; });
+    var cant = itemsEnCat.length;
+    var portadaImg = itemsEnCat.length > 0 ? itemsEnCat[0].imagen : '';
+    var catEscapada = cat.replace(/'/g, "\\'");
+
+    var portadaHtml = portadaImg
+      ? '<img src="' + portadaImg + '" class="folder-cover" alt="' + cat + '">'
+      : '<div class="folder-cover" style="display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;font-size:13px;">📁 ' + cat + '</div>';
+
+    html += '<div class="folder-card" onclick="abrirCarpeta(\'' + catEscapada + '\')">'
+      + portadaHtml
+      + '<div class="folder-body">'
+      + '<div class="folder-title">📁 ' + cat + '</div>'
+      + '<div class="folder-count">' + cant + ' plantillas</div>'
+      + '</div></div>';
+  });
+
+  contenedor.innerHTML = html;
+}
+
+function filtrarPlantillasGlobal() {
+  var inputBusca = document.getElementById('inputBuscadorPlantillas');
+  renderCarpetas(inputBusca ? inputBusca.value : '');
+}
+
+function crearCategoriaLocal() {
+  if (!esAdmin()) {
+    alert("🔒 Solo la Jefa puede crear categorías.");
+    return;
+  }
+  var inputCat = document.getElementById('nuevaCatNombre');
+  if (!inputCat) return;
+  var nombre = inputCat.value.trim();
+  if (!nombre) {
+    alert("Escribe un nombre.");
+    return;
+  }
+  if (categoriasCloud.indexOf(nombre) !== -1) {
+    alert("Ya existe esa categoría.");
+    return;
+  }
+  categoriasCloud.push(nombre);
+  localStorage.setItem('tn_categorias', JSON.stringify(categoriasCloud));
+  inputCat.value = '';
+  renderCarpetas();
+  alert("¡Categoría añadida!");
+}
+
+function abrirCarpeta(cat) {
+  carpetaActual = cat;
+  var vCarpetas = document.getElementById('vistaCarpetas');
+  var vDetalle = document.getElementById('vistaDetalleCarpeta');
+  var tCat = document.getElementById('tituloCarpetaActual');
+  if (vCarpetas) vCarpetas.style.display = 'none';
+  if (vDetalle) vDetalle.style.display = 'block';
+  if (tCat) tCat.innerText = "Carpeta: " + cat;
+  renderPlantillasCarpeta();
+}
+
+function volverCarpetas() {
+  carpetaActual = null;
+  var vCarpetas = document.getElementById('vistaCarpetas');
+  var vDetalle = document.getElementById('vistaDetalleCarpeta');
+  if (vDetalle) vDetalle.style.display = 'none';
+  if (vCarpetas) vCarpetas.style.display = 'block';
+  var buscador = document.getElementById('inputBuscadorPlantillas');
+  if (buscador) buscador.value = '';
+  renderCarpetas();
+}
+
+function limpiarMemoriaForzosa() {
+  if (confirm("¿Seguro que quieres vaciar la memoria y limpiar las imágenes atascadas?")) {
+    localStorage.removeItem('tn_plantillas');
+    plantillas = [];
+    renderCarpetas();
+    if (carpetaActual) renderPlantillasCarpeta();
+    alert("¡Memoria limpiada con éxito!");
+  }
+}
+
+function comprimirImagenSegura(file, callback) {
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var img = new Image();
+    img.onload = function() {
+      var canvas = document.createElement('canvas');
+      var width = img.width;
+      var height = img.height;
+      var maxDim = 900;
+      if (width > height && width > maxDim) {
+        height = Math.round(height * (maxDim / width));
+        width = maxDim;
+      } else if (height > maxDim) {
+        width = Math.round(width * (maxDim / height));
+        height = maxDim;
+      }
+      canvas.width = width;
+      canvas.height = height;
+      var ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      var dataUrl = canvas.toDataURL('image/jpeg', 0.75);
+      callback(dataUrl);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function subirPlantillaLocal() {
+  if (!esAdmin()) {
+    alert("🔒 Solo la Jefa puede subir plantillas.");
+    return;
+  }
+  var archivoInput = document.getElementById('fotoPlantilla');
+  if (!archivoInput || !archivoInput.files[0]) {
+    alert("Selecciona una imagen.");
+    return;
+  }
+  var archivo = archivoInput.files[0];
+
+  comprimirImagenSegura(archivo, function(imgOptimizada) {
+    try {
+      plantillas.push({ id: Date.now(), cat: carpetaActual, imagen: imgOptimizada });
+      localStorage.setItem('tn_plantillas', JSON.stringify(plantillas));
+      archivoInput.value = '';
+      renderPlantillasCarpeta();
+      alert("¡Lámina subida con éxito!");
+    } catch (err) {
+      alert("Memoria llena. Usa el botón de limpieza de emergencia.");
+    }
+  });
+}
+
+function renderPlantillasCarpeta() {
+  var grid = document.getElementById('gridPlantillas');
+  if (!grid) return;
+  var filtradas = plantillas.filter(function(p) { return p.cat === carpetaActual; });
+  var adminActivo = esAdmin();
+
+  if (filtradas.length === 0) {
+    grid.innerHTML = '<p style="grid-column:span 2;text-align:center;color:var(--text-muted);font-size:12px;">No hay plantillas en esta categoría aún.</p>';
+    return;
+  }
+
+  var favoritosLocales = JSON.parse(localStorage.getItem('tn_favs') || '[]');
+  var html = '';
+
+  filtradas.forEach(function(item) {
+    var idStr = String(item.id);
+    var esFav = favoritosLocales.indexOf(idStr) !== -1 || favoritosLocales.indexOf(item.id) !== -1;
+    var starClass = esFav ? 'fav-btn active' : 'fav-btn';
+    var starSymbol = esFav ? '★' : '☆';
+
+    html += '<div class="card">'
+      + '<button type="button" class="' + starClass + '" onclick="toggleFavoritoLocal(event, \'' + idStr + '\')">' + starSymbol + '</button>'
+      + '<div class="card-img-container" onclick="abrirViewer(\'' + item.imagen + '\')">'
+      + '<img src="' + item.imagen + '" alt="Plantilla">'
+      + '</div>'
+      + '<p>Toca para calcar</p>'
+      + (adminActivo ? '<button type="button" onclick="borrarPlantillaLocal(' + item.id + ')" style="background:#fff;color:#e74c3c;border:1px solid #e74c3c;padding:4px;font-size:10px;width:80%;margin:0 auto 6px;cursor:pointer;border-radius:6px;">🗑️ Borrar</button>' : '')
+      + '</div>';
+  });
+
+  grid.innerHTML = html;
+}
+
+function borrarPlantillaLocal(id) {
+  if (!esAdmin()) {
+    alert("🔒 Solo la Jefa puede borrar.");
+    return;
+  }
+  if (confirm("¿Borrar esta plantilla?")) {
+    plantillas = plantillas.filter(function(p) { return p.id !== id; });
+    localStorage.setItem('tn_plantillas', JSON.stringify(plantillas));
+    renderPlantillasCarpeta();
+  }
+}
+
+function toggleFavoritoLocal(evento, id) {
+  evento.stopPropagation();
+  var favoritosLocales = JSON.parse(localStorage.getItem('tn_favs') || '[]');
+  var idStr = String(id);
+  var index = favoritosLocales.indexOf(idStr);
+  if (index > -1) {
+    favoritosLocales.splice(index, 1);
+  } else {
+    favoritosLocales.push(idStr);
+  }
+  localStorage.setItem('tn_favs', JSON.stringify(favoritosLocales));
+  if (carpetaActual) renderPlantillasCarpeta();
+  renderFavoritos();
+}
+
+function renderFavoritos() {
+  var grid = document.getElementById('gridFavoritos');
+  if (!grid) return;
+  var favoritosLocales = JSON.parse(localStorage.getItem('tn_favs') || '[]').map(String);
+  var favs = plantillas.filter(function(p) { return favoritosLocales.indexOf(String(p.id)) !== -1; });
+
+  if (favs.length === 0) {
+    grid.innerHTML = '<p style="grid-column:span 2;text-align:center;color:var(--text-muted);font-size:12px;">No tienes favoritas aún.</p>';
+    return;
+  }
+
+  var html = '';
+  favs.forEach(function(item) {
+    html += '<div class="card">'
+      + '<button type="button" class="fav-btn active" onclick="toggleFavoritoLocal(event, \'' + item.id + '\')">★</button>'
+      + '<div class="card-img-container" onclick="abrirViewer(\'' + item.imagen + '\')">'
+      + '<img src="' + item.imagen + '" alt="Favorita">'
+      + '</div>'
+      + '<p>📁 ' + item.cat + '</p>'
+      + '</div>';
+  });
+
+  grid.innerHTML = html;
+}
+
+function procesarYGuardarTrabajo() {
+  if (!esProActivo()) {
+    alert("🔒 Contenido exclusivo para usuarios PRO.");
+    return;
+  }
+  var nombre = document.getElementById('nombreClienta').value.trim();
+  var colores = document.getElementById('coloresUsados').value.trim();
+  var archivoInput = document.getElementById('fotoTrabajo');
+  if (!archivoInput || !archivoInput.files[0]) {
+    alert("Selecciona la foto.");
+    return;
+  }
+  var archivo = archivoInput.files[0];
+
+  comprimirImagenSegura(archivo, function(imgOpt) {
+    trabajos.push({ id: Date.now(), nombre: nombre || "Manicura", colores: colores || "N/A", imagen: imgOpt });
+    localStorage.setItem('tn_trabajos', JSON.stringify(trabajos));
+    document.getElementById('nombreClienta').value = '';
+    document.getElementById('coloresUsados').value = '';
+    archivoInput.value = '';
+    renderTrabajos();
+    alert("¡Trabajo guardado!");
+  });
+}
+
+function renderTrabajos() {
+  var grid = document.getElementById('gridTrabajos');
+  if (!grid || !esProActivo()) return;
+  var buscador = document.getElementById('inputBuscadorTrabajos');
+  var textoBuscador = buscador ? buscador.value.toLowerCase() : '';
+  var filtrados = trabajos.filter(function(t) {
+    return t.nombre.toLowerCase().indexOf(textoBuscador) !== -1 || t.colores.toLowerCase().indexOf(textoBuscador) !== -1;
+  });
+
+  if (filtrados.length === 0) {
+    grid.innerHTML = '<p style="grid-column:span 2;text-align:center;color:var(--text-muted);font-size:12px;">No hay trabajos guardados.</p>';
+    return;
+  }
+
+  var html = '';
+  filtrados.forEach(function(t) {
+    html += '<div class="card">'
+      + '<div class="card-img-container" onclick="abrirViewer(\'' + t.imagen + '\')">'
+      + '<img src="' + t.imagen + '" alt="Trabajo">'
+      + '</div>'
+      + '<p>💅 ' + t.nombre + '<br><small style="color:var(--text-muted)">' + t.colores + '</small></p>'
+      + '<button type="button" onclick="borrarTrabajoLocal(' + t.id + ')" style="background:#fff;color:#e74c3c;border:1px solid #e74c3c;padding:4px;font-size:10px;width:80%;margin:0 auto 6px;cursor:pointer;border-radius:6px;">🗑️ Borrar</button>'
+      + '</div>';
+  });
+
+  grid.innerHTML = html;
+}
+
+function borrarTrabajoLocal(id) {
+  if (!esProActivo()) {
+    alert("🔒 Contenido exclusivo para usuarios PRO.");
+    return;
+  }
+  trabajos = trabajos.filter(function(t) { return t.id !== id; });
+  localStorage.setItem('tn_trabajos', JSON.stringify(trabajos));
+  renderTrabajos();
+}
+
+function guardarTrucoLocal() {
+  if (!esProActivo()) {
+    alert("🔒 Contenido exclusivo para usuarios PRO.");
+    return;
+  }
+  var titulo = document.getElementById('inputTituloTruco').value.trim();
+  var texto = document.getElementById('inputTextoTruco').value.trim();
+  var archivoInput = document.getElementById('archivoTruco');
+  var archivo = archivoInput ? archivoInput.files[0] : null;
+  if (!titulo || !texto) {
+    alert("Rellena el título y el texto del truco.");
+    return;
+  }
+
+  if (archivo) {
+    comprimirImagenSegura(archivo, function(imgOpt) {
+      trucos.push({ id: Date.now(), titulo: titulo, texto: texto, media: imgOpt });
+      localStorage.setItem('tn_trucos', JSON.stringify(trucos));
+      document.getElementById('inputTituloTruco').value = '';
+      document.getElementById('inputTextoTruco').value = '';
+      archivoInput.value = '';
+      renderTrucos();
+      alert("¡Truco publicado!");
+    });
+  } else {
+    trucos.push({ id: Date.now(), titulo: titulo, texto: texto, media: "" });
+    localStorage.setItem('tn_trucos', JSON.stringify(trucos));
+    document.getElementById('inputTituloTruco').value = '';
+    document.getElementById('inputTextoTruco').value = '';
+    renderTrucos();
+    alert("¡Truco publicado!");
+  }
+}
+
+function renderTrucos() {
+  var contenedor = document.getElementById('listaTrucos');
+  if (!contenedor || !esProActivo()) return;
+  if (trucos.length === 0) {
+    contenedor.innerHTML = '<div class="box"><p style="text-align:center;color:var(--text-muted);font-size:12px;">No hay trucos aún.</p></div>';
+    return;
+  }
+
+  var html = '';
+  trucos.forEach(function(t) {
+    var mediaHtml = t.media
+      ? '<div class="card-img-container" onclick="abrirViewer(\'' + t.media + '\')" style="margin-top:8px;border-radius:10px;overflow:hidden;"><img src="' + t.media + '" alt="Truco"></div>'
+      : '';
+    html += '<div class="box">'
+      + '<h4 style="margin:0 0 4px 0;color:var(--primary-dark);font-size:14px;">💡 ' + t.titulo + '</h4>'
+      + '<p style="margin:0 0 8px 0;font-size:12px;color:var(--text-main);white-space:pre-wrap;">' + t.texto + '</p>'
+      + mediaHtml
+      + (esAdmin() ? '<button type="button" onclick="borrarTruco(' + t.id + ')" style="background:#fff;color:#e74c3c;border:1px solid #e74c3c;padding:3px 8px;font-size:10px;width:auto;cursor:pointer;border-radius:6px;margin-top:8px;">🗑️ Borrar</button>' : '')
+      + '</div>';
+  });
+
+  contenedor.innerHTML = html;
+}
+
+function borrarTruco(id) {
+  trucos = trucos.filter(function(t) { return t.id !== id; });
+  localStorage.setItem('tn_trucos', JSON.stringify(trucos));
+  renderTrucos();
+}
+
+function publicarComunidadLocal() {
+  if (!esProActivo()) {
+    alert("🔒 Contenido exclusivo para usuarios PRO.");
+    return;
+  }
+  var autor = document.getElementById('autorComunidad').value.trim();
+  var texto = document.getElementById('textoComunidad').value.trim();
+  var archivoInput = document.getElementById('fotoComunidad');
+  var archivo = archivoInput ? archivoInput.files[0] : null;
+  if (!autor || !texto) {
+    alert("Rellena tu nombre y el texto.");
+    return;
+  }
+
+  if (archivo) {
+    comprimirImagenSegura(archivo, function(imgOpt) {
+      comunidad.push({ id: Date.now(), autor: autor, texto: texto, imagen: imgOpt });
+      localStorage.setItem('tn_comunidad', JSON.stringify(comunidad));
+      document.getElementById('autorComunidad').value = '';
+      document.getElementById('textoComunidad').value = '';
+      archivoInput.value = '';
+      renderComunidad();
+      alert("¡Publicado en la comunidad!");
+    });
+  } else {
+    comunidad.push({ id: Date.now(), autor: autor, texto: texto, imagen: "" });
+    localStorage.setItem('tn_comunidad', JSON.stringify(comunidad));
+    document.getElementById('autorComunidad').value = '';
+    document.getElementById('textoComunidad').value = '';
+    renderComunidad();
+    alert("¡Publicado en la comunidad!");
+  }
+}
+
+function renderComunidad() {
+  var contenedor = document.getElementById('listaComunidad');
+  if (!contenedor || !esProActivo()) return;
+  if (comunidad.length === 0) {
+    contenedor.innerHTML = '<div class="box"><p style="text-align:center;color:var(--text-muted);font-size:12px;">No hay publicaciones todavía.</p></div>';
+    return;
+  }
+
+  var html = '';
+  comunidad.forEach(function(p) {
+    var imagenHtml = p.imagen
+      ? '<div class="card-img-container" onclick="abrirViewer(\'' + p.imagen + '\')" style="margin-top:8px;border-radius:10px;overflow:hidden;"><img src="' + p.imagen + '" alt="Comunidad"></div>'
+      : '';
+    html += '<div class="box">'
+      + '<b style="color:var(--primary-dark);font-size:13px;">💬 ' + p.autor + '</b>'
+      + '<p style="margin:4px 0;font-size:12px;color:var(--text-main);white-space:pre-wrap;">' + p.texto + '</p>'
+      + imagenHtml
+      + (esAdmin() ? '<button type="button" onclick="borrarComunidad(' + p.id + ')" style="background:#fff;color:#e74c3c;border:1px solid #e74c3c;padding:3px 8px;font-size:10px;width:auto;cursor:pointer;border-radius:6px;margin-top:8px;">🗑️ Borrar</button>' : '')
+      + '</div>';
+  });
+
+  contenedor.innerHTML = html;
+}
+
+function borrarComunidad(id) {
+  comunidad = comunidad.filter(function(p) { return p.id !== id; });
+  localStorage.setItem('tn_comunidad', JSON.stringify(comunidad));
+  renderComunidad();
+}
+
+var viewer = document.getElementById('viewer');
+var imgGrande = document.getElementById('imgGrande');
+var zoomRange = document.getElementById('zoomRange');
+var bloqueado = false;
+var escala = 1, posX = 0, posY = 0;
+var startX = 0, startY = 0, dragging = false;
+
+function abrirViewer(src) {
+  if (!viewer || !imgGrande || !zoomRange) return;
+  imgGrande.src = src;
+  escala = 1;
+  posX = 0;
+  posY = 0;
+  zoomRange.value = 100;
+  actualizarTransform();
+  viewer.classList.add('on');
+  bloqueado = false;
+  viewer.classList.remove('bloqueado');
+  var lockBtn = document.getElementById('lockBtn');
+  if (lockBtn) lockBtn.innerText = "🔒 BLOQUEAR";
+}
+
+function cerrarViewer() {
+  if (!bloqueado && viewer) viewer.classList.remove('on');
+}
+
+function toggleLock() {
+  bloqueado = !bloqueado;
+  if (viewer) viewer.classList.toggle('bloqueado', bloqueado);
+  var lockBtn = document.getElementById('lockBtn');
+  if (lockBtn) lockBtn.innerText = bloqueado ? "🔓 DESBLOQUEAR" : "🔒 BLOQUEAR";
+}
+
+if (zoomRange) {
+  zoomRange.addEventListener('input', function(e) {
+    escala = e.target.value / 100;
+    actualizarTransform();
+  });
+}
+
+function actualizarTransform() {
+  if (imgGrande) {
+    imgGrande.style.transform = 'translate(' + posX + 'px, ' + posY + 'px) scale(' + escala + ')';
+  }
+}
+
+if (imgGrande) {
+  imgGrande.addEventListener('pointerdown', function(e) {
+    if (bloqueado) return;
+    dragging = true;
+    startX = e.clientX - posX;
+    startY = e.clientY - posY;
+    try { imgGrande.setPointerCapture(e.pointerId); } catch (err) {}
+  });
+
+  imgGrande.addEventListener('pointermove', function(e) {
+    if (!dragging || bloqueado) return;
+    posX = e.clientX - startX;
+    posY = e.clientY - startY;
+    actualizarTransform();
+  });
+
+  imgGrande.addEventListener('pointerup', function(e) {
+    dragging = false;
+    try { imgGrande.releasePointerCapture(e.pointerId); } catch (err) {}
+  });
+}
+
+function buscarEnPinterest() {
+  var input = document.getElementById('busquedaWebInput');
+  var consulta = input ? input.value.trim() : '';
+  if (!consulta) {
+    alert("Escribe algo para buscar.");
+    return;
+  }
+  window.open('https://www.pinterest.com/search/pins/?q=' + encodeURIComponent(consulta + ' nail art'), '_blank');
+}
+
+function buscarEnGoogle() {
+  var input = document.getElementById('busquedaWebInput');
+  var consulta = input ? input.value.trim() : '';
+  if (!consulta) {
+    alert("Escribe algo para buscar.");
+    return;
+  }
+  window.open('https://www.google.com/search?tbm=isch&q=' + encodeURIComponent(consulta + ' nail art'), '_blank');
+}
+
+cargarDatosLocales();
+verificarAccesoPro();
+renderCarpetas();
+</script>
+
+</body>
+</html>
