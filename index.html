@@ -110,9 +110,9 @@ button.action-btn:hover{filter: brightness(1.1);}
     </div>
 
     <div class="box" id="boxResetTotal" style="display:none;background:#fff5f5;border:1px solid #feb2b2;">
-      <b style="color:#c53030;">⚠️ Zona de Jefa: Limpieza de Emergencia</b>
-      <p style="font-size:11px;color:#742a2a;margin:4px 0 8px;">Si se satura la memoria, pulsa aquí para vaciar el espacio:</p>
-      <button type="button" onclick="limpiarMemoriaForzosa()" style="background:#e53e3e;color:#fff;border:none;padding:8px;border-radius:8px;font-weight:bold;cursor:pointer;width:100%;">🗑️ Borrar caché y vaciar galería</button>
+      <b style="color:#c53030;">⚠️ Zona de Jefa: Limpieza de Caché Local</b>
+      <p style="font-size:11px;color:#742a2a;margin:4px 0 8px;">Limpia solo la caché del navegador (los datos subidos a Firebase permanecen en la nube):</p>
+      <button type="button" onclick="limpiarMemoriaForzosa()" style="background:#e53e3e;color:#fff;border:none;padding:8px;border-radius:8px;font-weight:bold;cursor:pointer;width:100%;">🗑️ Borrar caché local</button>
     </div>
 
     <div style="font-size:13px;font-weight:700;margin:14px 0 8px 4px;color:var(--primary-dark);">📁 Categorías de Plantillas:</div>
@@ -134,7 +134,7 @@ button.action-btn:hover{filter: brightness(1.1);}
     <h3 id="tituloCarpetaActual" style="margin:5px 0 12px;font-size:16px;color:var(--primary-dark);"></h3>
 
     <div class="box" id="boxSubirPlantilla" style="display:none;">
-      <b>🗂️ Subir Plantilla (Solo Jefa)</b>
+      <b>🗂️ Subir Plantilla a la Nube (Solo Jefa)</b>
       <input type="file" id="fotoPlantilla" accept="image/*">
       <button type="button" class="action-btn" onclick="subirPlantillaLocal()">Subir Lámina</button>
     </div>
@@ -244,7 +244,28 @@ button.action-btn:hover{filter: brightness(1.1);}
   </div>
 </div>
 
-<script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-analytics.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+import { getStorage, ref, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-storage.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA9tMOYwvXMVNC1fe0UQG2Zs3GE2-sVPNA",
+  authDomain: "toque-natural-2407b.firebaseapp.com",
+  projectId: "toque-natural-2407b",
+  storageBucket: "toque-natural-2407b.firebasestorage.app",
+  messagingSenderId: "860008728334",
+  appId: "1:860008728334:web:42a40c50281c8f79eb795f",
+  measurementId: "G-WX2J6RJF7T"
+};
+
+const app = initializeApp(firebaseConfig);
+try { getAnalytics(app); } catch (e) {}
+const db = getFirestore(app);
+const storage = getStorage(app);
+const docRef = doc(db, "toqueNatural", "datosApp");
+
 var categoriasCloud = [
   "Halloween", "Flores", "Mariposas", "Corazones y románticos",
   "Navidad", "San Valentín", "Cáritas y expresiones", "Pestañas",
@@ -256,6 +277,39 @@ var trabajos = [];
 var trucos = [];
 var comunidad = [];
 var carpetaActual = null;
+
+function guardarLocalRespaldo() {
+  try {
+    localStorage.setItem('tn_categorias', JSON.stringify(categoriasCloud));
+    localStorage.setItem('tn_plantillas', JSON.stringify(plantillas));
+    localStorage.setItem('tn_trabajos', JSON.stringify(trabajos));
+    localStorage.setItem('tn_trucos', JSON.stringify(trucos));
+    localStorage.setItem('tn_comunidad', JSON.stringify(comunidad));
+  } catch (e) {}
+}
+
+async function guardarEnNube() {
+  guardarLocalRespaldo();
+  try {
+    await setDoc(docRef, {
+      categorias: categoriasCloud,
+      plantillas: plantillas,
+      trabajos: trabajos,
+      trucos: trucos,
+      comunidad: comunidad,
+      actualizado: Date.now()
+    });
+  } catch (e) {
+    console.error("Error guardando en Firestore:", e);
+  }
+}
+
+async function subirImagenStorage(dataUrl, carpetaStorage) {
+  const nombreArchivo = carpetaStorage + "/" + Date.now() + "_" + Math.floor(Math.random() * 10000) + ".jpg";
+  const storageRef = ref(storage, nombreArchivo);
+  await uploadString(storageRef, dataUrl, "data_url");
+  return await getDownloadURL(storageRef);
+}
 
 function cargarDatosLocales() {
   try {
@@ -269,8 +323,36 @@ function cargarDatosLocales() {
     trabajos = JSON.parse(localStorage.getItem('tn_trabajos') || '[]') || [];
     trucos = JSON.parse(localStorage.getItem('tn_trucos') || '[]') || [];
     comunidad = JSON.parse(localStorage.getItem('tn_comunidad') || '[]') || [];
+  } catch (e) {}
+}
+
+async function cargarDatosNube() {
+  cargarDatosLocales();
+  renderCarpetas();
+  try {
+    const snap = await getDoc(docRef);
+    if (snap.exists()) {
+      const data = snap.data();
+      if (Array.isArray(data.categorias)) {
+        data.categorias.forEach(function(c) {
+          if (categoriasCloud.indexOf(c) === -1) categoriasCloud.push(c);
+        });
+      }
+      if (Array.isArray(data.plantillas)) plantillas = data.plantillas;
+      if (Array.isArray(data.trabajos)) trabajos = data.trabajos;
+      if (Array.isArray(data.trucos)) trucos = data.trucos;
+      if (Array.isArray(data.comunidad)) comunidad = data.comunidad;
+      guardarLocalRespaldo();
+      renderCarpetas();
+      if (carpetaActual) renderPlantillasCarpeta();
+      if (esProActivo()) {
+        renderTrabajos();
+        renderTrucos();
+        renderComunidad();
+      }
+    }
   } catch (e) {
-    console.error("Error leyendo almacenamiento:", e);
+    console.error("Error cargando desde Firestore:", e);
   }
 }
 
@@ -322,7 +404,7 @@ function verificarAccesoPro() {
 
   if (estadoTxt) {
     if (adminActivo) {
-      estadoTxt.innerHTML = '✨ <b style="color:green;">¡Modo Jefa Activo!</b> Tienes control total.';
+      estadoTxt.innerHTML = '✨ <b style="color:green;">¡Modo Jefa Activo!</b> Nube Firebase conectada.';
     } else if (proActivo) {
       estadoTxt.innerHTML = '✨ <b style="color:green;">¡Acceso PRO Activo!</b> Disfruta de los trabajos, trucos y comunidad.';
     } else {
@@ -427,7 +509,7 @@ function filtrarPlantillasGlobal() {
   renderCarpetas(inputBusca ? inputBusca.value : '');
 }
 
-function crearCategoriaLocal() {
+async function crearCategoriaLocal() {
   if (!esAdmin()) {
     alert("🔒 Solo la Jefa puede crear categorías.");
     return;
@@ -444,10 +526,10 @@ function crearCategoriaLocal() {
     return;
   }
   categoriasCloud.push(nombre);
-  localStorage.setItem('tn_categorias', JSON.stringify(categoriasCloud));
   inputCat.value = '';
   renderCarpetas();
-  alert("¡Categoría añadida!");
+  await guardarEnNube();
+  alert("¡Categoría añadida en la nube!");
 }
 
 function abrirCarpeta(cat) {
@@ -473,12 +555,13 @@ function volverCarpetas() {
 }
 
 function limpiarMemoriaForzosa() {
-  if (confirm("¿Seguro que quieres vaciar la memoria y limpiar las imágenes atascadas?")) {
+  if (confirm("¿Seguro que quieres vaciar la caché local de este navegador?")) {
     localStorage.removeItem('tn_plantillas');
-    plantillas = [];
-    renderCarpetas();
-    if (carpetaActual) renderPlantillasCarpeta();
-    alert("¡Memoria limpiada con éxito!");
+    localStorage.removeItem('tn_trabajos');
+    localStorage.removeItem('tn_trucos');
+    localStorage.removeItem('tn_comunidad');
+    cargarDatosNube();
+    alert("¡Caché local limpiada!");
   }
 }
 
@@ -490,7 +573,7 @@ function comprimirImagenSegura(file, callback) {
       var canvas = document.createElement('canvas');
       var width = img.width;
       var height = img.height;
-      var maxDim = 900;
+      var maxDim = 1100;
       if (width > height && width > maxDim) {
         height = Math.round(height * (maxDim / width));
         width = maxDim;
@@ -502,7 +585,7 @@ function comprimirImagenSegura(file, callback) {
       canvas.height = height;
       var ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0, width, height);
-      var dataUrl = canvas.toDataURL('image/jpeg', 0.75);
+      var dataUrl = canvas.toDataURL('image/jpeg', 0.82);
       callback(dataUrl);
     };
     img.src = e.target.result;
@@ -522,15 +605,17 @@ function subirPlantillaLocal() {
   }
   var archivo = archivoInput.files[0];
 
-  comprimirImagenSegura(archivo, function(imgOptimizada) {
+  comprimirImagenSegura(archivo, async function(imgOptimizada) {
     try {
-      plantillas.push({ id: Date.now(), cat: carpetaActual, imagen: imgOptimizada });
-      localStorage.setItem('tn_plantillas', JSON.stringify(plantillas));
+      const urlNube = await subirImagenStorage(imgOptimizada, "plantillas");
+      plantillas.push({ id: Date.now(), cat: carpetaActual, imagen: urlNube });
       archivoInput.value = '';
       renderPlantillasCarpeta();
-      alert("¡Lámina subida con éxito!");
+      await guardarEnNube();
+      alert("¡Lámina subida a Firebase con éxito!");
     } catch (err) {
-      alert("Memoria llena. Usa el botón de limpieza de emergencia.");
+      console.error(err);
+      alert("No se pudo subir a Firebase. Revisa las reglas de Storage y Firestore.");
     }
   });
 }
@@ -568,15 +653,15 @@ function renderPlantillasCarpeta() {
   grid.innerHTML = html;
 }
 
-function borrarPlantillaLocal(id) {
+async function borrarPlantillaLocal(id) {
   if (!esAdmin()) {
     alert("🔒 Solo la Jefa puede borrar.");
     return;
   }
   if (confirm("¿Borrar esta plantilla?")) {
     plantillas = plantillas.filter(function(p) { return p.id !== id; });
-    localStorage.setItem('tn_plantillas', JSON.stringify(plantillas));
     renderPlantillasCarpeta();
+    await guardarEnNube();
   }
 }
 
@@ -634,14 +719,19 @@ function procesarYGuardarTrabajo() {
   }
   var archivo = archivoInput.files[0];
 
-  comprimirImagenSegura(archivo, function(imgOpt) {
-    trabajos.push({ id: Date.now(), nombre: nombre || "Manicura", colores: colores || "N/A", imagen: imgOpt });
-    localStorage.setItem('tn_trabajos', JSON.stringify(trabajos));
-    document.getElementById('nombreClienta').value = '';
-    document.getElementById('coloresUsados').value = '';
-    archivoInput.value = '';
-    renderTrabajos();
-    alert("¡Trabajo guardado!");
+  comprimirImagenSegura(archivo, async function(imgOpt) {
+    try {
+      const urlNube = await subirImagenStorage(imgOpt, "trabajos");
+      trabajos.push({ id: Date.now(), nombre: nombre || "Manicura", colores: colores || "N/A", imagen: urlNube });
+      document.getElementById('nombreClienta').value = '';
+      document.getElementById('coloresUsados').value = '';
+      archivoInput.value = '';
+      renderTrabajos();
+      await guardarEnNube();
+      alert("¡Trabajo guardado en la nube!");
+    } catch (err) {
+      alert("Error al subir el trabajo a la nube.");
+    }
   });
 }
 
@@ -673,14 +763,14 @@ function renderTrabajos() {
   grid.innerHTML = html;
 }
 
-function borrarTrabajoLocal(id) {
+async function borrarTrabajoLocal(id) {
   if (!esProActivo()) {
     alert("🔒 Contenido exclusivo para usuarios PRO.");
     return;
   }
   trabajos = trabajos.filter(function(t) { return t.id !== id; });
-  localStorage.setItem('tn_trabajos', JSON.stringify(trabajos));
   renderTrabajos();
+  await guardarEnNube();
 }
 
 function guardarTrucoLocal() {
@@ -698,21 +788,26 @@ function guardarTrucoLocal() {
   }
 
   if (archivo) {
-    comprimirImagenSegura(archivo, function(imgOpt) {
-      trucos.push({ id: Date.now(), titulo: titulo, texto: texto, media: imgOpt });
-      localStorage.setItem('tn_trucos', JSON.stringify(trucos));
-      document.getElementById('inputTituloTruco').value = '';
-      document.getElementById('inputTextoTruco').value = '';
-      archivoInput.value = '';
-      renderTrucos();
-      alert("¡Truco publicado!");
+    comprimirImagenSegura(archivo, async function(imgOpt) {
+      try {
+        const urlNube = await subirImagenStorage(imgOpt, "trucos");
+        trucos.push({ id: Date.now(), titulo: titulo, texto: texto, media: urlNube });
+        document.getElementById('inputTituloTruco').value = '';
+        document.getElementById('inputTextoTruco').value = '';
+        archivoInput.value = '';
+        renderTrucos();
+        await guardarEnNube();
+        alert("¡Truco publicado en la nube!");
+      } catch (err) {
+        alert("Error al subir la imagen del truco.");
+      }
     });
   } else {
     trucos.push({ id: Date.now(), titulo: titulo, texto: texto, media: "" });
-    localStorage.setItem('tn_trucos', JSON.stringify(trucos));
     document.getElementById('inputTituloTruco').value = '';
     document.getElementById('inputTextoTruco').value = '';
     renderTrucos();
+    guardarEnNube();
     alert("¡Truco publicado!");
   }
 }
@@ -741,10 +836,10 @@ function renderTrucos() {
   contenedor.innerHTML = html;
 }
 
-function borrarTruco(id) {
+async function borrarTruco(id) {
   trucos = trucos.filter(function(t) { return t.id !== id; });
-  localStorage.setItem('tn_trucos', JSON.stringify(trucos));
   renderTrucos();
+  await guardarEnNube();
 }
 
 function publicarComunidadLocal() {
@@ -762,21 +857,26 @@ function publicarComunidadLocal() {
   }
 
   if (archivo) {
-    comprimirImagenSegura(archivo, function(imgOpt) {
-      comunidad.push({ id: Date.now(), autor: autor, texto: texto, imagen: imgOpt });
-      localStorage.setItem('tn_comunidad', JSON.stringify(comunidad));
-      document.getElementById('autorComunidad').value = '';
-      document.getElementById('textoComunidad').value = '';
-      archivoInput.value = '';
-      renderComunidad();
-      alert("¡Publicado en la comunidad!");
+    comprimirImagenSegura(archivo, async function(imgOpt) {
+      try {
+        const urlNube = await subirImagenStorage(imgOpt, "comunidad");
+        comunidad.push({ id: Date.now(), autor: autor, texto: texto, imagen: urlNube });
+        document.getElementById('autorComunidad').value = '';
+        document.getElementById('textoComunidad').value = '';
+        archivoInput.value = '';
+        renderComunidad();
+        await guardarEnNube();
+        alert("¡Publicado en la comunidad!");
+      } catch (err) {
+        alert("Error al subir la foto a la comunidad.");
+      }
     });
   } else {
     comunidad.push({ id: Date.now(), autor: autor, texto: texto, imagen: "" });
-    localStorage.setItem('tn_comunidad', JSON.stringify(comunidad));
     document.getElementById('autorComunidad').value = '';
     document.getElementById('textoComunidad').value = '';
     renderComunidad();
+    guardarEnNube();
     alert("¡Publicado en la comunidad!");
   }
 }
@@ -805,10 +905,10 @@ function renderComunidad() {
   contenedor.innerHTML = html;
 }
 
-function borrarComunidad(id) {
+async function borrarComunidad(id) {
   comunidad = comunidad.filter(function(p) { return p.id !== id; });
-  localStorage.setItem('tn_comunidad', JSON.stringify(comunidad));
   renderComunidad();
+  await guardarEnNube();
 }
 
 var viewer = document.getElementById('viewer');
@@ -899,9 +999,30 @@ function buscarEnGoogle() {
   window.open('https://www.google.com/search?tbm=isch&q=' + encodeURIComponent(consulta + ' nail art'), '_blank');
 }
 
-cargarDatosLocales();
+window.cambiarPestana = cambiarPestana;
+window.validarCodigoPro = validarCodigoPro;
+window.crearCategoriaLocal = crearCategoriaLocal;
+window.filtrarPlantillasGlobal = filtrarPlantillasGlobal;
+window.abrirCarpeta = abrirCarpeta;
+window.volverCarpetas = volverCarpetas;
+window.limpiarMemoriaForzosa = limpiarMemoriaForzosa;
+window.subirPlantillaLocal = subirPlantillaLocal;
+window.borrarPlantillaLocal = borrarPlantillaLocal;
+window.toggleFavoritoLocal = toggleFavoritoLocal;
+window.procesarYGuardarTrabajo = procesarYGuardarTrabajo;
+window.borrarTrabajoLocal = borrarTrabajoLocal;
+window.guardarTrucoLocal = guardarTrucoLocal;
+window.borrarTruco = borrarTruco;
+window.publicarComunidadLocal = publicarComunidadLocal;
+window.borrarComunidad = borrarComunidad;
+window.abrirViewer = abrirViewer;
+window.cerrarViewer = cerrarViewer;
+window.toggleLock = toggleLock;
+window.buscarEnPinterest = buscarEnPinterest;
+window.buscarEnGoogle = buscarEnGoogle;
+
 verificarAccesoPro();
-renderCarpetas();
+cargarDatosNube();
 </script>
 
 </body>
