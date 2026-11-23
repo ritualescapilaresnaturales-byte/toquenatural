@@ -112,8 +112,8 @@ button.action-btn:hover{filter: brightness(1.1);}
     <!-- ZONA OCULTA: Solo aparece si eres Jefa -->
     <div class="box" id="boxResetTotal" style="display:none;background:#fff5f5;border:1px solid #feb2b2;">
       <b style="color:#c53030;">⚠️ Zona de Jefa: Limpieza de Emergencia</b>
-      <p style="font-size:11px;color:#742a2a;margin:4px 0 8px;">Si se satura la memoria, pulsa aquí para vaciar el espacio:</p>
-      <button onclick="limpiarMemoriaForzosa()" style="background:#e53e3e;color:#fff;border:none;padding:8px;border-radius:8px;font-weight:bold;cursor:pointer;width:100%;">🗑️ Borrar caché y vaciar galería</button>
+      <p style="font-size:11px;color:#742a2a;margin:4px 0 8px;">Si se satura la memoria local, pulsa aquí para vaciar la caché del navegador:</p>
+      <button onclick="limpiarMemoriaForzosa()" style="background:#e53e3e;color:#fff;border:none;padding:8px;border-radius:8px;font-weight:bold;cursor:pointer;width:100%;">🗑️ Borrar caché local</button>
     </div>
 
     <div style="font-size:13px;font-weight:700;margin:14px 0 8px 4px;color:var(--primary-dark);">📁 Categorías de Plantillas:</div>
@@ -179,10 +179,12 @@ button.action-btn:hover{filter: brightness(1.1);}
     </div>
     <div id="listaTrucos"></div>
   </div>
-  <div id="avisoTrucosBloqueado" style="display:none;" class="box" style="text-align:center;">
-    <h3 style="color:var(--primary);">🔒 Contenido Exclusivo PRO</h3>
-    <p style="font-size:13px;color:var(--text-muted);">El rincón de trucos y técnicas solo está disponible para cuentas PRO y suscritas.</p>
-    <button class="action-btn" onclick="cambiarPestana('pro')">✨ Activar acceso PRO</button>
+  <div id="avisoTrucosBloqueado" style="display:none;" class="box">
+    <div style="text-align:center;">
+      <h3 style="color:var(--primary);">🔒 Contenido Exclusivo PRO</h3>
+      <p style="font-size:13px;color:var(--text-muted);">El rincón de trucos y técnicas solo está disponible para cuentas PRO y suscritas.</p>
+      <button class="action-btn" onclick="cambiarPestana('pro')">✨ Activar acceso PRO</button>
+    </div>
   </div>
 </div>
 
@@ -199,10 +201,12 @@ button.action-btn:hover{filter: brightness(1.1);}
     </div>
     <div id="listaComunidad"></div>
   </div>
-  <div id="avisoComunidadBloqueado" style="display:none;" class="box" style="text-align:center;">
-    <h3 style="color:var(--primary);">🔒 Comunidad Exclusiva PRO</h3>
-    <p style="font-size:13px;color:var(--text-muted);">El chat de la comunidad es un espacio reservado para profesionales suscritos.</p>
-    <button class="action-btn" onclick="cambiarPestana('pro')">✨ Activar acceso PRO</button>
+  <div id="avisoComunidadBloqueado" style="display:none;" class="box">
+    <div style="text-align:center;">
+      <h3 style="color:var(--primary);">🔒 Comunidad Exclusiva PRO</h3>
+      <p style="font-size:13px;color:var(--text-muted);">El chat de la comunidad es un espacio reservado para profesionales suscritos.</p>
+      <button class="action-btn" onclick="cambiarPestana('pro')">✨ Activar acceso PRO</button>
+    </div>
   </div>
 </div>
 
@@ -234,27 +238,99 @@ button.action-btn:hover{filter: brightness(1.1);}
   </div>
 </div>
 
-<script>
-let categoriasCloud = [
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import {
+  getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA9tMOYwvXMVNC1fe0UQG2Zs3GE2-sVPNA",
+  authDomain: "toque-natural-2407b.firebaseapp.com",
+  projectId: "toque-natural-2407b",
+  storageBucket: "toque-natural-2407b.firebasestorage.app",
+  messagingSenderId: "860008728334",
+  appId: "1:860008728334:web:42a40c50281c8f79eb795f",
+  measurementId: "G-WX2J6RJF7T"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const categoriasBase = [
   "Halloween", "Flores", "Mariposas", "Corazones y románticos",
   "Navidad", "San Valentín", "Cáritas y expresiones", "Pestañas",
   "Animales", "Fantasía", "Dibujos animados / Disney", "Otros dibujos"
 ];
 
-let savedCats = JSON.parse(localStorage.getItem('tn_categorias') || '[]');
-savedCats.forEach(c => {
-  if(!categoriasCloud.includes(c)) categoriasCloud.push(c);
-});
-
+let categoriasCloud = [...categoriasBase];
 let plantillas = JSON.parse(localStorage.getItem('tn_plantillas') || '[]');
 let trabajos = JSON.parse(localStorage.getItem('tn_trabajos') || '[]');
 let trucos = JSON.parse(localStorage.getItem('tn_trucos') || '[]');
 let comunidad = JSON.parse(localStorage.getItem('tn_comunidad') || '[]');
 let carpetaActual = null;
 
+function guardarCacheLocal() {
+  try { localStorage.setItem('tn_plantillas', JSON.stringify(plantillas)); } catch(e) {}
+  try { localStorage.setItem('tn_trabajos', JSON.stringify(trabajos)); } catch(e) {}
+  try { localStorage.setItem('tn_trucos', JSON.stringify(trucos)); } catch(e) {}
+  try { localStorage.setItem('tn_comunidad', JSON.stringify(comunidad)); } catch(e) {}
+}
+
+function iniciarSyncFirestore() {
+  onSnapshot(collection(db, "categorias"), (snap) => {
+    const merged = [...categoriasBase];
+    snap.forEach((d) => {
+      const nombre = d.data().nombre || d.id;
+      if (nombre && !merged.includes(nombre)) merged.push(nombre);
+    });
+    categoriasCloud = merged;
+    if (!carpetaActual) renderCarpetas();
+  }, () => {});
+
+  onSnapshot(collection(db, "plantillas"), (snap) => {
+    const lista = [];
+    snap.forEach((d) => lista.push({ id: d.id, ...d.data() }));
+    lista.sort((a, b) => (a.creado || 0) - (b.creado || 0));
+    plantillas = lista;
+    guardarCacheLocal();
+    if (!carpetaActual) renderCarpetas();
+    else renderPlantillasCarpeta();
+    renderFavoritos();
+  }, () => {});
+
+  onSnapshot(collection(db, "trabajos"), (snap) => {
+    const lista = [];
+    snap.forEach((d) => lista.push({ id: d.id, ...d.data() }));
+    lista.sort((a, b) => (b.creado || 0) - (a.creado || 0));
+    trabajos = lista;
+    guardarCacheLocal();
+    renderTrabajos();
+  }, () => {});
+
+  onSnapshot(collection(db, "trucos"), (snap) => {
+    const lista = [];
+    snap.forEach((d) => lista.push({ id: d.id, ...d.data() }));
+    lista.sort((a, b) => (b.creado || 0) - (a.creado || 0));
+    trucos = lista;
+    guardarCacheLocal();
+    renderTrucos();
+  }, () => {});
+
+  onSnapshot(collection(db, "comunidad"), (snap) => {
+    const lista = [];
+    snap.forEach((d) => lista.push({ id: d.id, ...d.data() }));
+    lista.sort((a, b) => (b.creado || 0) - (a.creado || 0));
+    comunidad = lista;
+    guardarCacheLocal();
+    renderComunidad();
+  }, () => {});
+}
+
 window.addEventListener('DOMContentLoaded', () => {
   verificarAccesoPro();
   renderCarpetas();
+  iniciarSyncFirestore();
 });
 
 function esAdmin() {
@@ -271,16 +347,15 @@ function verificarAccesoPro() {
   let estadoTxt = document.getElementById('estadoSuscripcion');
   let adminActivo = esAdmin();
   let proActivo = esProActivo();
-  
+
   let boxCrear = document.getElementById('boxCrearCat');
   let boxSubir = document.getElementById('boxSubirPlantilla');
   let boxReset = document.getElementById('boxResetTotal');
-  
+
   if(boxCrear) boxCrear.style.display = adminActivo ? 'block' : 'none';
   if(boxSubir) boxSubir.style.display = adminActivo ? 'block' : 'none';
   if(boxReset) boxReset.style.display = adminActivo ? 'block' : 'none';
 
-  // Bloquear o desbloquear Trucos y Comunidad según si es PRO o Jefa
   let contenidoTrucos = document.getElementById('contenidoTrucosPro');
   let avisoTrucos = document.getElementById('avisoTrucosBloqueado');
   let contenidoComunidad = document.getElementById('contenidoComunidadPro');
@@ -309,7 +384,7 @@ function verificarAccesoPro() {
   }
 }
 
-function validarCodigoPro() {
+window.validarCodigoPro = function() {
   let inputElem = document.getElementById('inputCodigoPro');
   if(!inputElem) return;
   let codigoIngresado = inputElem.value.trim();
@@ -317,7 +392,7 @@ function validarCodigoPro() {
 
   if(codigoIngresado === "Jefa22" || codigoIngresado === "jefa22") {
     localStorage.setItem('tn_es_admin', 'true');
-    localStorage.setItem('tn_pro_expira', Date.now() + 365*24*60*60*1000);
+    localStorage.setItem('tn_pro_expira', String(Date.now() + 365*24*60*60*1000));
     inputElem.value = '';
     verificarAccesoPro();
     alert("¡Hola Jefa! Modo administración activado con éxito.");
@@ -328,7 +403,7 @@ function validarCodigoPro() {
   let codigoMesActual = localStorage.getItem('tn_codigo_mes_actual') || "NOVIEMBRE26";
   if(codigoIngresado.toUpperCase() === codigoMesActual.toUpperCase()) {
     let fechaExpiracion = Date.now() + (30 * 24 * 60 * 60 * 1000);
-    localStorage.setItem('tn_pro_expira', fechaExpiracion);
+    localStorage.setItem('tn_pro_expira', String(fechaExpiracion));
     inputElem.value = '';
     verificarAccesoPro();
     alert("¡Código PRO validado con éxito!");
@@ -336,9 +411,9 @@ function validarCodigoPro() {
   } else {
     alert("Contraseña o código incorrecto.");
   }
-}
+};
 
-function cambiarPestana(p) {
+window.cambiarPestana = function(p) {
   ['secPlantillas','secFavoritos','secTrabajos','secTrucos','secComunidad','secPro'].forEach(id => {
     let sec = document.getElementById(id);
     if(sec) sec.style.display = 'none';
@@ -360,7 +435,7 @@ function cambiarPestana(p) {
   if(p === 'trucos') renderTrucos();
   if(p === 'comunidad') renderComunidad();
   if(p === 'pro') verificarAccesoPro();
-}
+};
 
 function renderCarpetas(filtro = '') {
   const contenedor = document.getElementById('listaCarpetas');
@@ -373,10 +448,12 @@ function renderCarpetas(filtro = '') {
     let cant = itemsEnCat.length;
     let portadaImg = itemsEnCat.length > 0 ? itemsEnCat[0].imagen : '';
 
-    let portadaHtml = portadaImg ? `<img src="${portadaImg}" class="folder-cover">` : `<div class="folder-cover" style="display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;font-size:13px;">📁 ${cat}</div>`;
+    let portadaHtml = portadaImg
+      ? `<img src="${portadaImg}" class="folder-cover" alt="${cat}">`
+      : `<div class="folder-cover" style="display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;font-size:13px;">📁 ${cat}</div>`;
 
     html += `
-      <div class="folder-card" onclick="abrirCarpeta('${cat}')">
+      <div class="folder-card" onclick="abrirCarpeta('${encodeURIComponent(cat)}')">
         ${portadaHtml}
         <div class="folder-body">
           <div class="folder-title">📁 ${cat}</div>
@@ -388,37 +465,41 @@ function renderCarpetas(filtro = '') {
   contenedor.innerHTML = html;
 }
 
-function filtrarPlantillasGlobal() {
+window.filtrarPlantillasGlobal = function() {
   let inputBusca = document.getElementById('inputBuscadorPlantillas');
   renderCarpetas(inputBusca ? inputBusca.value : '');
-}
+};
 
-function crearCategoriaLocal() {
+window.crearCategoriaLocal = async function() {
   if(!esAdmin()) { alert("🔒 Solo la Jefa puede crear categorías."); return; }
   const inputCat = document.getElementById('nuevaCatNombre');
   if(!inputCat) return;
   const nombre = inputCat.value.trim();
   if(!nombre) return alert("Escribe un nombre.");
   if(categoriasCloud.includes(nombre)) return alert("Ya existe.");
-  categoriasCloud.push(nombre);
-  localStorage.setItem('tn_categorias', JSON.stringify(categoriasCloud));
-  inputCat.value = '';
-  renderCarpetas();
-  alert("¡Categoría añadida!");
-}
 
-function abrirCarpeta(cat) {
-  carpetaActual = cat;
+  try {
+    const docId = encodeURIComponent(nombre.toLowerCase());
+    await setDoc(doc(db, "categorias", docId), { nombre, creado: Date.now() });
+    inputCat.value = '';
+    alert("¡Categoría guardada en Firebase!");
+  } catch(e) {
+    alert("Error al guardar categoría en Firestore.");
+  }
+};
+
+window.abrirCarpeta = function(catEncoded) {
+  carpetaActual = decodeURIComponent(catEncoded);
   let vCarpetas = document.getElementById('vistaCarpetas');
   let vDetalle = document.getElementById('vistaDetalleCarpeta');
   let tCat = document.getElementById('tituloCarpetaActual');
   if(vCarpetas) vCarpetas.style.display = 'none';
   if(vDetalle) vDetalle.style.display = 'block';
-  if(tCat) tCat.innerText = "Carpeta: " + cat;
+  if(tCat) tCat.innerText = "Carpeta: " + carpetaActual;
   renderPlantillasCarpeta();
-}
+};
 
-function volverCarpetas() {
+window.volverCarpetas = function() {
   carpetaActual = null;
   let vCarpetas = document.getElementById('vistaCarpetas');
   let vDetalle = document.getElementById('vistaDetalleCarpeta');
@@ -427,17 +508,17 @@ function volverCarpetas() {
   let buscador = document.getElementById('inputBuscadorPlantillas');
   if(buscador) buscador.value = '';
   renderCarpetas();
-}
+};
 
-function limpiarMemoriaForzosa() {
-  if(confirm("¿Seguro que quieres vaciar la memoria y limpiar las imágenes atascadas?")) {
+window.limpiarMemoriaForzosa = function() {
+  if(confirm("¿Seguro que quieres vaciar la caché local de este dispositivo?")) {
     localStorage.removeItem('tn_plantillas');
-    plantillas = [];
-    renderCarpetas();
-    if(carpetaActual) renderPlantillasCarpeta();
-    alert("¡Memoria limpiada con éxito!");
+    localStorage.removeItem('tn_trabajos');
+    localStorage.removeItem('tn_trucos');
+    localStorage.removeItem('tn_comunidad');
+    alert("¡Caché local limpiada!");
   }
-}
+};
 
 function comprimirImagenSegura(file, callback) {
   const reader = new FileReader();
@@ -447,7 +528,7 @@ function comprimirImagenSegura(file, callback) {
       const canvas = document.createElement('canvas');
       let width = img.width;
       let height = img.height;
-      const maxDim = 900;
+      const maxDim = 750;
       if (width > height && width > maxDim) {
         height *= maxDim / width;
         width = maxDim;
@@ -459,7 +540,7 @@ function comprimirImagenSegura(file, callback) {
       canvas.height = height;
       const ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0, width, height);
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.75);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.65);
       callback(dataUrl);
     };
     img.src = e.target.result;
@@ -467,85 +548,87 @@ function comprimirImagenSegura(file, callback) {
   reader.readAsDataURL(file);
 }
 
-function subirPlantillaLocal() {
+window.subirPlantillaLocal = function() {
   if(!esAdmin()) { alert("🔒 Solo la Jefa puede subir plantillas."); return; }
   const archivoInput = document.getElementById('fotoPlantilla');
   if(!archivoInput || !archivoInput.files[0]) return alert("Selecciona una imagen.");
   const archivo = archivoInput.files[0];
 
-  alert("Optimizando y guardando lámina...");
-  comprimirImagenSegura(archivo, function(imgOptimizada) {
+  comprimirImagenSegura(archivo, async function(imgOptimizada) {
     try {
-      plantillas.push({ id: Date.now(), cat: carpetaActual, imagen: imgOptimizada });
-      localStorage.setItem('tn_plantillas', JSON.stringify(plantillas));
+      const id = String(Date.now());
+      await setDoc(doc(db, "plantillas", id), {
+        cat: carpetaActual,
+        imagen: imgOptimizada,
+        creado: Date.now()
+      });
       archivoInput.value = '';
-      renderPlantillasCarpeta();
-      alert("¡Lámina subida con éxito!");
+      alert("¡Lámina subida a Firebase!");
     } catch(err) {
-      alert("Memoria llena. Usa el botón de limpieza de emergencia.");
+      alert("No se pudo guardar en Firestore (prueba con una imagen más ligera).");
     }
   });
-}
+};
 
 function renderPlantillasCarpeta() {
   const grid = document.getElementById('gridPlantillas');
   if(!grid) return;
   let filtradas = plantillas.filter(p => p.cat === carpetaActual);
   let adminActivo = esAdmin();
-  
+
   if(filtradas.length === 0) {
     grid.innerHTML = '<p style="grid-column:span 2;text-align:center;color:var(--text-muted);font-size:12px;">No hay plantillas en esta categoría aún.</p>';
     return;
   }
 
+  let favoritosLocales = JSON.parse(localStorage.getItem('tn_favs') || '[]');
   let html = '';
   filtradas.forEach((item) => {
-    let favoritosLocales = JSON.parse(localStorage.getItem('tn_favs') || '[]');
-    let esFav = favoritosLocales.includes(item.id);
-    let starClass = esFav ? 'fav-btn activo' : 'fav-btn';
+    let esFav = favoritosLocales.includes(String(item.id));
+    let starClass = esFav ? 'fav-btn active' : 'fav-btn';
     let starSymbol = esFav ? '★' : '☆';
 
     html += `
       <div class="card">
         <button class="${starClass}" onclick="toggleFavoritoLocal(event, '${item.id}')">${starSymbol}</button>
         <div class="card-img-container" onclick="abrirViewer('${item.imagen}')">
-          <img src="${item.imagen}">
+          <img src="${item.imagen}" alt="Plantilla">
         </div>
         <p>Toca para calcar</p>
-        ${adminActivo ? `<button onclick="borrarPlantillaLocal(${item.id})" style="background:#fff;color:#e74c3c;border:1px solid #e74c3c;padding:4px;font-size:10px;width:80%;margin:0 auto 6px;cursor:pointer;border-radius:6px;">🗑️ Borrar</button>` : ''}
+        ${adminActivo ? `<button onclick="borrarPlantillaLocal('${item.id}')" style="background:#fff;color:#e74c3c;border:1px solid #e74c3c;padding:4px;font-size:10px;width:80%;margin:0 auto 6px;cursor:pointer;border-radius:6px;">🗑️ Borrar</button>` : ''}
       </div>
     `;
   });
   grid.innerHTML = html;
 }
 
-function borrarPlantillaLocal(id) {
+window.borrarPlantillaLocal = async function(id) {
   if(!esAdmin()) { alert("🔒 Solo la Jefa puede borrar."); return; }
   if(confirm("¿Borrar esta plantilla?")) {
-    plantillas = plantillas.filter(p => p.id !== id);
-    localStorage.setItem('tn_plantillas', JSON.stringify(plantillas));
-    renderPlantillasCarpeta();
+    await deleteDoc(doc(db, "plantillas", String(id)));
   }
-}
+};
 
-function toggleFavoritoLocal(evento, id) {
+window.toggleFavoritoLocal = function(evento, id) {
   evento.stopPropagation();
+  const keyId = String(id);
   let favoritosLocales = JSON.parse(localStorage.getItem('tn_favs') || '[]');
-  let index = favoritosLocales.indexOf(id);
+  let index = favoritosLocales.indexOf(keyId);
   if(index > -1) {
     favoritosLocales.splice(index, 1);
   } else {
-    favoritosLocales.push(id);
+    favoritosLocales.push(keyId);
   }
   localStorage.setItem('tn_favs', JSON.stringify(favoritosLocales));
   if(carpetaActual) renderPlantillasCarpeta();
-}
+  renderFavoritos();
+};
 
 function renderFavoritos() {
   const grid = document.getElementById('gridFavoritos');
   if(!grid) return;
   let favoritosLocales = JSON.parse(localStorage.getItem('tn_favs') || '[]');
-  let favs = plantillas.filter(p => favoritosLocales.includes(p.id));
+  let favs = plantillas.filter(p => favoritosLocales.includes(String(p.id)));
 
   if(favs.length === 0) {
     grid.innerHTML = '<p style="grid-column:span 2;text-align:center;color:var(--text-muted);font-size:12px;">No tienes favoritas aún.</p>';
@@ -557,7 +640,7 @@ function renderFavoritos() {
       <div class="card">
         <button class="fav-btn active" onclick="toggleFavoritoLocal(event, '${item.id}')">★</button>
         <div class="card-img-container" onclick="abrirViewer('${item.imagen}')">
-          <img src="${item.imagen}">
+          <img src="${item.imagen}" alt="Favorita">
         </div>
         <p>📁 ${item.cat}</p>
       </div>
@@ -566,29 +649,33 @@ function renderFavoritos() {
   grid.innerHTML = html;
 }
 
-function procesarYGuardarTrabajo() {
+window.procesarYGuardarTrabajo = function() {
   const nombre = document.getElementById('nombreClienta').value.trim();
   const colores = document.getElementById('coloresUsados').value.trim();
   const archivoInput = document.getElementById('fotoTrabajo');
   if(!archivoInput || !archivoInput.files[0]) return alert("Selecciona la foto.");
   const archivo = archivoInput.files[0];
 
-  comprimirImagenSegura(archivo, function(imgOpt) {
-    trabajos.push({ id: Date.now(), nombre: nombre || "Manicura", colores: colores || "N/A", imagen: imgOpt });
-    localStorage.setItem('tn_trabajos', JSON.stringify(trabajos));
+  comprimirImagenSegura(archivo, async function(imgOpt) {
+    const id = String(Date.now());
+    await setDoc(doc(db, "trabajos", id), {
+      nombre: nombre || "Manicura",
+      colores: colores || "N/A",
+      imagen: imgOpt,
+      creado: Date.now()
+    });
     document.getElementById('nombreClienta').value = '';
     document.getElementById('coloresUsados').value = '';
     archivoInput.value = '';
-    renderTrabajos();
-    alert("¡Trabajo guardado!");
+    alert("¡Trabajo guardado en Firebase!");
   });
-}
+};
 
 function renderTrabajos() {
   const grid = document.getElementById('gridTrabajos');
   if(!grid) return;
   const textoBuscador = document.getElementById('inputBuscadorTrabajos') ? document.getElementById('inputBuscadorTrabajos').value.toLowerCase() : '';
-  let filtrados = trabajos.filter(t => t.nombre.toLowerCase().includes(textoBuscador) || t.colores.toLowerCase().includes(textoBuscador));
+  let filtrados = trabajos.filter(t => (t.nombre || '').toLowerCase().includes(textoBuscador) || (t.colores || '').toLowerCase().includes(textoBuscador));
 
   if(filtrados.length === 0) {
     grid.innerHTML = '<p style="grid-column:span 2;text-align:center;color:var(--text-muted);font-size:12px;">No hay trabajos guardados.</p>';
@@ -599,23 +686,21 @@ function renderTrabajos() {
     html += `
       <div class="card">
         <div class="card-img-container" onclick="abrirViewer('${t.imagen}')">
-          <img src="${t.imagen}">
+          <img src="${t.imagen}" alt="Trabajo">
         </div>
         <p>💅 ${t.nombre}<br><small style="color:var(--text-muted)">${t.colores}</small></p>
-        <button onclick="borrarTrabajoLocal(${t.id})" style="background:#fff;color:#e74c3c;border:1px solid #e74c3c;padding:4px;font-size:10px;width:80%;margin:0 auto 6px;cursor:pointer;border-radius:6px;">🗑️ Borrar</button>
+        <button onclick="borrarTrabajoLocal('${t.id}')" style="background:#fff;color:#e74c3c;border:1px solid #e74c3c;padding:4px;font-size:10px;width:80%;margin:0 auto 6px;cursor:pointer;border-radius:6px;">🗑️ Borrar</button>
       </div>
     `;
   });
   grid.innerHTML = html;
 }
 
-function borrarTrabajoLocal(id) {
-  trabajos = trabajos.filter(t => t.id !== id);
-  localStorage.setItem('tn_trabajos', JSON.stringify(trabajos));
-  renderTrabajos();
-}
+window.borrarTrabajoLocal = async function(id) {
+  await deleteDoc(doc(db, "trabajos", String(id)));
+};
 
-function guardarTrucoLocal() {
+window.guardarTrucoLocal = function() {
   if(!esProActivo()) { alert("🔒 Contenido exclusivo para usuarios PRO."); return; }
   const titulo = document.getElementById('inputTituloTruco').value.trim();
   const texto = document.getElementById('inputTextoTruco').value.trim();
@@ -623,25 +708,21 @@ function guardarTrucoLocal() {
   const archivo = archivoInput ? archivoInput.files[0] : null;
   if(!titulo || !texto) return alert("Rellena el título y el texto del truco.");
 
-  if(archivo) {
-    comprimirImagenSegura(archivo, function(imgOpt) {
-      trucos.push({ id: Date.now(), titulo, texto, media: imgOpt });
-      localStorage.setItem('tn_trucos', JSON.stringify(trucos));
-      document.getElementById('inputTituloTruco').value = '';
-      document.getElementById('inputTextoTruco').value = '';
-      archivoInput.value = '';
-      renderTrucos();
-      alert("¡Truco publicado!");
-    });
-  } else {
-    trucos.push({ id: Date.now(), titulo, texto, media: "" });
-    localStorage.setItem('tn_trucos', JSON.stringify(trucos));
+  const guardarDoc = async (mediaData) => {
+    const id = String(Date.now());
+    await setDoc(doc(db, "trucos", id), { titulo, texto, media: mediaData, creado: Date.now() });
     document.getElementById('inputTituloTruco').value = '';
     document.getElementById('inputTextoTruco').value = '';
-    renderTrucos();
+    if(archivoInput) archivoInput.value = '';
     alert("¡Truco publicado!");
+  };
+
+  if(archivo) {
+    comprimirImagenSegura(archivo, guardarDoc);
+  } else {
+    guardarDoc("");
   }
-}
+};
 
 function renderTrucos() {
   const contenedor = document.getElementById('listaTrucos');
@@ -652,26 +733,24 @@ function renderTrucos() {
   }
   let html = '';
   trucos.forEach(t => {
-    let mediaHtml = t.media ? `<div class="card-img-container" onclick="abrirViewer('${t.media}')" style="margin-top:8px;border-radius:10px;overflow:hidden;"><img src="${t.media}"></div>` : '';
+    let mediaHtml = t.media ? `<div class="card-img-container" onclick="abrirViewer('${t.media}')" style="margin-top:8px;border-radius:10px;overflow:hidden;"><img src="${t.media}" alt="Truco"></div>` : '';
     html += `
       <div class="box">
         <h4 style="margin:0 0 4px 0;color:var(--primary-dark);font-size:14px;">💡 ${t.titulo}</h4>
         <p style="margin:0 0 8px 0;font-size:12px;color:var(--text-main);white-space:pre-wrap;">${t.texto}</p>
         ${mediaHtml}
-        ${esAdmin() ? `<button onclick="borrarTruco(${t.id})" style="background:#fff;color:#e74c3c;border:1px solid #e74c3c;padding:3px 8px;font-size:10px;width:auto;cursor:pointer;border-radius:6px;margin-top:8px;">🗑️ Borrar</button>` : ''}
+        ${esAdmin() ? `<button onclick="borrarTruco('${t.id}')" style="background:#fff;color:#e74c3c;border:1px solid #e74c3c;padding:3px 8px;font-size:10px;width:auto;cursor:pointer;border-radius:6px;margin-top:8px;">🗑️ Borrar</button>` : ''}
       </div>
     `;
   });
   contenedor.innerHTML = html;
 }
 
-function borrarTruco(id) {
-  trucos = trucos.filter(t => t.id !== id);
-  localStorage.setItem('tn_trucos', JSON.stringify(trucos));
-  renderTrucos();
-}
+window.borrarTruco = async function(id) {
+  await deleteDoc(doc(db, "trucos", String(id)));
+};
 
-function publicarComunidadLocal() {
+window.publicarComunidadLocal = function() {
   if(!esProActivo()) { alert("🔒 Contenido exclusivo para usuarios PRO."); return; }
   const autor = document.getElementById('autorComunidad').value.trim();
   const texto = document.getElementById('textoComunidad').value.trim();
@@ -679,25 +758,21 @@ function publicarComunidadLocal() {
   const archivo = archivoInput ? archivoInput.files[0] : null;
   if(!autor || !texto) return alert("Rellena tu nombre y el texto.");
 
-  if(archivo) {
-    comprimirImagenSegura(archivo, function(imgOpt) {
-      comunidad.push({ id: Date.now(), autor, texto, imagen: imgOpt });
-      localStorage.setItem('tn_comunidad', JSON.stringify(comunidad));
-      document.getElementById('autorComunidad').value = '';
-      document.getElementById('textoComunidad').value = '';
-      archivoInput.value = '';
-      renderComunidad();
-      alert("¡Publicado en la comunidad!");
-    });
-  } else {
-    comunidad.push({ id: Date.now(), autor, texto, imagen: "" });
-    localStorage.setItem('tn_comunidad', JSON.stringify(comunidad));
+  const guardarDoc = async (imgData) => {
+    const id = String(Date.now());
+    await setDoc(doc(db, "comunidad", id), { autor, texto, imagen: imgData, creado: Date.now() });
     document.getElementById('autorComunidad').value = '';
     document.getElementById('textoComunidad').value = '';
-    renderComunidad();
+    if(archivoInput) archivoInput.value = '';
     alert("¡Publicado en la comunidad!");
+  };
+
+  if(archivo) {
+    comprimirImagenSegura(archivo, guardarDoc);
+  } else {
+    guardarDoc("");
   }
-}
+};
 
 function renderComunidad() {
   const contenedor = document.getElementById('listaComunidad');
@@ -708,24 +783,22 @@ function renderComunidad() {
   }
   let html = '';
   comunidad.forEach(p => {
-    let imagenHtml = p.imagen ? `<div class="card-img-container" onclick="abrirViewer('${p.imagen}')" style="margin-top:8px;border-radius:10px;overflow:hidden;"><img src="${p.imagen}"></div>` : '';
+    let imagenHtml = p.imagen ? `<div class="card-img-container" onclick="abrirViewer('${p.imagen}')" style="margin-top:8px;border-radius:10px;overflow:hidden;"><img src="${p.imagen}" alt="Comunidad"></div>` : '';
     html += `
       <div class="box">
         <b style="color:var(--primary-dark);font-size:13px;">💬 ${p.autor}</b>
         <p style="margin:4px 0;font-size:12px;color:var(--text-main);white-space:pre-wrap;">${p.texto}</p>
         ${imagenHtml}
-        ${esAdmin() ? `<button onclick="borrarComunidad(${p.id})" style="background:#fff;color:#e74c3c;border:1px solid #e74c3c;padding:3px 8px;font-size:10px;width:auto;cursor:pointer;border-radius:6px;margin-top:8px;">🗑️ Borrar</button>` : ''}
+        ${esAdmin() ? `<button onclick="borrarComunidad('${p.id}')" style="background:#fff;color:#e74c3c;border:1px solid #e74c3c;padding:3px 8px;font-size:10px;width:auto;cursor:pointer;border-radius:6px;margin-top:8px;">🗑️ Borrar</button>` : ''}
       </div>
     `;
   });
   contenedor.innerHTML = html;
 }
 
-function borrarComunidad(id) {
-  comunidad = comunidad.filter(p => p.id !== id);
-  localStorage.setItem('tn_comunidad', JSON.stringify(comunidad));
-  renderComunidad();
-}
+window.borrarComunidad = async function(id) {
+  await deleteDoc(doc(db, "comunidad", String(id)));
+};
 
 const viewer = document.getElementById('viewer');
 const imgGrande = document.getElementById('imgGrande');
@@ -734,7 +807,7 @@ let bloqueado = false;
 let escala = 1, posX = 0, posY = 0;
 let startX = 0, startY = 0, dragging = false;
 
-function abrirViewer(src) {
+window.abrirViewer = function(src) {
   imgGrande.src = src;
   escala = 1; posX = 0; posY = 0;
   zoomRange.value = 100;
@@ -743,17 +816,17 @@ function abrirViewer(src) {
   bloqueado = false;
   viewer.classList.remove('bloqueado');
   document.getElementById('lockBtn').innerText = "🔒 BLOQUEAR";
-}
+};
 
-function cerrarViewer() {
+window.cerrarViewer = function() {
   if(!bloqueado) viewer.classList.remove('on');
-}
+};
 
-function toggleLock() {
+window.toggleLock = function() {
   bloqueado = !bloqueado;
   viewer.classList.toggle('bloqueado', bloqueado);
   document.getElementById('lockBtn').innerText = bloqueado ? "🔓 DESBLOQUEAR" : "🔒 BLOQUEAR";
-}
+};
 
 zoomRange.addEventListener('input', (e) => {
   escala = e.target.value / 100;
@@ -784,17 +857,17 @@ imgGrande.addEventListener('pointerup', (e) => {
   try { imgGrande.releasePointerCapture(e.pointerId); } catch(err) {}
 });
 
-function buscarEnPinterest() {
+window.buscarEnPinterest = function() {
   const consulta = document.getElementById('busquedaWebInput').value.trim();
   if(!consulta) { alert("Escribe algo para buscar."); return; }
   window.open(`https://www.pinterest.com/search/pins/?q=${encodeURIComponent(consulta + ' nail art')}`, '_blank');
-}
+};
 
-function buscarEnGoogle() {
+window.buscarEnGoogle = function() {
   const consulta = document.getElementById('busquedaWebInput').value.trim();
   if(!consulta) { alert("Escribe algo para buscar."); return; }
   window.open(`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(consulta + ' nail art')}`, '_blank');
-}
+};
 </script>
 
 </body>
